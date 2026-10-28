@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyQuest - Accueil</title>
+    <link rel="stylesheet" href="../css/components/login.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+            <div class="logo-badge" style="margin-bottom: 24px;">
+                <i class="fa-solid fa-check logo-icon" style="color: #4ade80;"></i>
+            </div>
+
+            <h1 class="brand-title" style="margin-bottom: 12px;">Bravo !</h1>
+            <p class="brand-subtitle" style="font-size: 16px; margin-bottom: 24px;">
+                Vous êtes connecté en tant que <strong id="username-display" style="color: #6366f1;">Utilisateur</strong>.
+            </p>
+
+            <p class="auth-hint" style="text-align: center; margin-bottom: 24px;">
+                Bienvenue sur StudyQuest. La suite de ton tableau de bord arrive bientôt ici !
+            </p>
+
+            <button id="btn-logout" class="btn-submit" style="background-color: #2d2d34; color: #9ca3af;">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Se déconnecter</span>
+            </button>
+
+        </div>
+    </main>
+
+    <!-- Script pour récupérer l'utilisateur et gérer la déconnexion -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Récupère l'utilisateur stocké dans le localStorage
+            const storedUser = localStorage.getItem('studyquest_user');
+
+            if (!storedUser) {
+                // Si aucun utilisateur n'est connecté, on le renvoie vers la page de login
+                window.location.href = '../index.html'; // Ajuste le chemin si ton fichier login.html est à la racine
+                return;
+            }
+
+            const user = JSON.parse(storedUser);
+            const usernameSpan = document.getElementById('username-display');
+            
+            // Affiche le pseudo
+            if (usernameSpan && user.username) {
+                usernameSpan.textContent = user.username;
+            }
+
+            // Gestion de la déconnexion
+            const logoutBtn = document.getElementById('btn-logout');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    localStorage.removeItem('studyquest_user');
+                    window.location.href = '../index.html';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
