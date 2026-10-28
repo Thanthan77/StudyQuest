@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyQuest - Connexion</title>
+    <link rel="stylesheet" href="css/components/login.css">
+    <!-- FontAwesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <main class="login-container">
+        <div class="login-card">
+            
+            <!-- Logo principal -->
+            <div class="logo-badge">
+                <i class="fa-solid fa-fire logo-icon"></i>
+            </div>
+
+            <!-- Titres & Sous-titres -->
+            <h1 class="brand-title">StudyQuest</h1>
+            <p class="brand-subtitle">
+                Valide tes tâches, garde ta série et grimpe au classement avec tes potes.
+            </p>
+
+            <!-- Formulaire de connexion -->
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username-input">Ton pseudo</label>
+                    <div class="input-wrapper">
+                        <i class="fa-regular fa-user input-icon"></i>
+                        <input 
+                            type="text" 
+                            id="username-input" 
+                            placeholder="Entre ton pseudo..." 
+                            required 
+                            autocomplete="off"
+                        >
+                    </div>
+                </div>
+
+                <p class="auth-hint">
+                    Pas de mot de passe : ton pseudo suffit pour retrouver ta série.
+                </p>
+
+                <p id="error-message" class="error-msg"></p>
+
+                <button type="submit" class="btn-submit">
+                    <span>Commencer l’aventure</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <!-- Footer avec les 3 caractéristiques -->
+            <div class="features-footer">
+                <div class="feature-item">
+                    <i class="fa-solid fa-fire feature-icon icon-fire"></i>
+                    <span class="feature-title">Séries</span>
+                    <span class="feature-desc">2 tâches par jour</span>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fa-regular fa-snowflake feature-icon icon-ice"></i>
+                    <span class="feature-title">Gels</span>
+                    <span class="feature-desc">Sauve ta série</span>
+                </div>
+
+                <div class="feature-item">
+                    <i class="fa-solid fa-trophy feature-icon icon-trophy"></i>
+                    <span class="feature-title">Classement</span>
+                    <span class="feature-desc">Défie tes groupes</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- JS Auth module -->
+    <script type="module" src="auth.js"></script>
+</body>
+</html>
