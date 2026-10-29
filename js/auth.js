@@ -50,6 +50,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Version allégée sans requête supplémentaire :
+    const storedUser = localStorage.getItem('studyquest_user');
+    if (storedUser) {
+        const localUser = JSON.parse(storedUser);
+    if (usernameDisplay) {
+        usernameDisplay.textContent = localUser.username;
+    }
+}
+
     // Gestion du bouton de déconnexion
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
