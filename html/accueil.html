@@ -32,34 +32,55 @@
     </main>
 
     <!-- Script pour récupérer l'utilisateur et gérer la déconnexion -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Récupère l'utilisateur stocké dans le localStorage
-            const storedUser = localStorage.getItem('studyquest_user');
+    <script type="module">
+    import { supabase } from '../supabaseClient.js'; // Ajuste le chemin vers ton supabaseClient.js
 
-            if (!storedUser) {
-                // Si aucun utilisateur n'est connecté, on le renvoie vers la page de login
-                window.location.href = '../index.html'; // Ajuste le chemin si ton fichier login.html est à la racine
+    document.addEventListener('DOMContentLoaded', async () => {
+        // 1. Récupère l'utilisateur stocké en local
+        const storedUser = localStorage.getItem('studyquest_user');
+
+        if (!storedUser) {
+            // Aucun utilisateur en cache local, redirection vers la page de login
+            window.location.href = '../index.html';
+            return;
+        }
+
+        const localUser = JSON.parse(storedUser);
+        
+        try {
+            // 2. Vérification optionnelle mais recommandée : s'assurer que l'utilisateur existe toujours dans Supabase via son ID ou son pseudo
+            let { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', localUser.id)
+                .single();
+
+            if (error || !profile) {
+                // Si l'utilisateur n'existe plus dans la BDB, on nettoie et on redirige
+                localStorage.removeItem('studyquest_user');
+                window.location.href = '../index.html';
                 return;
             }
 
-            const user = JSON.parse(storedUser);
+            // 3. Affiche le pseudo récupéré de la base de données
             const usernameSpan = document.getElementById('username-display');
-            
-            // Affiche le pseudo
-            if (usernameSpan && user.username) {
-                usernameSpan.textContent = user.username;
+            if (usernameSpan && profile.username) {
+                usernameSpan.textContent = profile.username;
             }
 
-            // Gestion de la déconnexion
-            const logoutBtn = document.getElementById('btn-logout');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', () => {
-                    localStorage.removeItem('studyquest_user');
-                    window.location.href = '../index.html';
-                });
-            }
-        });
-    </script>
+        } catch (err) {
+            console.error("Erreur lors de la vérification de l'utilisateur :", err.message);
+        }
+
+        // 4. Gestion de la déconnexion
+        const logoutBtn = document.getElementById('btn-logout');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('studyquest_user');
+                window.location.href = '../index.html';
+            });
+        }
+    });
+</script>
 </body>
 </html>
