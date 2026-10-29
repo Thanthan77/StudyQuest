@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = usernameInput.value.trim();
+            const username = usernameInput.value.trim().toLowerCase();
 
             if (!username) return;
 
