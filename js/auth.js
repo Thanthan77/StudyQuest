@@ -49,4 +49,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Gestion du bouton de déconnexion
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Nettoie le stockage local de la session
+            localStorage.removeItem('studyquest_user');
+            sessionStorage.clear();
+
+            // Redirige vers la page de connexion à la racine
+            // (Ajuste '../index.html' si ton script est dans un sous-dossier comme 'js/')
+            window.location.href = '../index.html';
+        });
+    }
+
+
 });

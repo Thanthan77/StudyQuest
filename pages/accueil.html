@@ -31,56 +31,5 @@
         </div>
     </main>
 
-    <!-- Script pour récupérer l'utilisateur et gérer la déconnexion -->
-    <script type="module">
-    import { supabase } from '../js/supabaseClient.js'; 
-
-    document.addEventListener('DOMContentLoaded', async () => {
-        // 1. Récupère l'utilisateur stocké en local
-        const storedUser = localStorage.getItem('studyquest_user');
-
-        if (!storedUser) {
-            // Aucun utilisateur en cache local, redirection vers la page de login
-            window.location.href = '../index.html';
-            return;
-        }
-
-        const localUser = JSON.parse(storedUser);
-        
-        try {
-            // 2. Vérification optionnelle mais recommandée : s'assurer que l'utilisateur existe toujours dans Supabase via son ID ou son pseudo
-            let { data: profile, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', localUser.id)
-                .single();
-
-            if (error || !profile) {
-               // L'utilisateur n'existe plus dans la base de données, redirection vers la page de login
-                localStorage.removeItem('studyquest_user');
-                window.location.href = '../index.html';
-                return;
-            }
-
-            // 3. Affiche le pseudo récupéré de la base de données
-            const usernameSpan = document.getElementById('username-display');
-            if (usernameSpan && profile.username) {
-                usernameSpan.textContent = profile.username;
-            }
-
-        } catch (err) {
-            console.error("Erreur lors de la vérification de l'utilisateur :", err.message);
-        }
-
-        // 4. Gestion de la déconnexion
-        const logoutBtn = document.getElementById('btn-logout');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                localStorage.removeItem('studyquest_user');
-                window.location.href = '../index.html';
-            });
-        }
-    });
-</script>
 </body>
 </html>
