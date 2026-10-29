@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('studyquest_user', JSON.stringify(profile));
 
                 // Redirige vers la page d'accueil principale
-                window.location.href = '../pages/accueil.html';
+                window.location.href = 'pages/accueil.html';
 
             } catch (err) {
                 console.error('Erreur de connexion :', err.message);
