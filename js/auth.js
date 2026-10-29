@@ -1,10 +1,10 @@
-// auth.js
 import { supabase } from './supabaseClient.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const usernameInput = document.getElementById('username-input');
     const errorMessage = document.getElementById('error-message');
+    const usernameDisplay = document.getElementById('username-display');
 
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -69,8 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('studyquest_user');
             sessionStorage.clear();
 
-            // Redirige vers la page de connexion à la racine
-            // (Ajuste '../index.html' si ton script est dans un sous-dossier comme 'js/')
             window.location.href = '../index.html';
         });
     }
