@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (err) {
                 console.error('Erreur de connexion :', err.message);
                 if (errorMessage) {
-                    errorMessage.textContent = "Une erreur est survenue lors de la connexion.";
+                    errorMessage.textContent = `Erreur : ${err.message}`;
                 }
             }
         });
