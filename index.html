@@ -23,7 +23,7 @@
             <!-- Titres & Sous-titres -->
             <h1 class="brand-title">StudyQuest</h1>
             <p class="brand-subtitle">
-                Valide tes tâches, garde ta série et grimpe au classement avec tes potes.
+                Content de te revoir. Ta série t'attend.
             </p>
 
             <!-- Formulaire de connexion -->
@@ -38,21 +38,36 @@
                             placeholder="Entre ton pseudo..." 
                             required 
                             autocomplete="off"
+                            autocapitalize="none"
+                            spellcheck="false"
                         >
                     </div>
                 </div>
 
-                <p class="auth-hint">
-                    Pas de mot de passe : ton pseudo suffit pour retrouver ta série.
-                </p>
+                <!-- Champ Code PIN à 4 chiffres -->
+                <div class="form-group">
+                    <label>Code PIN à 4 chiffres</label>
+                    <div class="pin-container">
+                        <input type="password" inputmode="numeric" maxlength="1" class="pin-input" required autocomplete="off">
+                        <input type="password" inputmode="numeric" maxlength="1" class="pin-input" required autocomplete="off">
+                        <input type="password" inputmode="numeric" maxlength="1" class="pin-input" required autocomplete="off">
+                        <input type="password" inputmode="numeric" maxlength="1" class="pin-input" required autocomplete="off">
+                    </div>
+                </div>
 
                 <p id="error-message" class="error-msg"></p>
 
                 <button type="submit" class="btn-submit">
-                    <span>Commencer l’aventure</span>
+                    <span>Entrer</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </form>
+
+            <!-- Lien bascule vers l'inscription -->
+            <div class="auth-switch">
+                <span>Nouveau sur StudyQuest ?</span> 
+                <a href="pages/signup.html">Créer un compte</a>
+            </div>
 
             <!-- Footer avec les 3 caractéristiques -->
             <div class="features-footer">
@@ -80,5 +95,6 @@
 
     <!-- JS Auth module -->
     <script type="module" src="js/auth.js"></script>
+    <script src="js/pin.js"></script>
 </body>
 </html>

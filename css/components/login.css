@@ -45,9 +45,10 @@ body {
     box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
 }
 
-.logo-badge i {
-    font-size: 24px;
-    color: #facc15; /* Icône de goutte dorée/jaune */
+.logo-badge .logo-icon {
+    font-size: 22px;
+    color: white !important; 
+    margin: 0 !important;
 }
 
 /* En-tête de la carte */
@@ -68,7 +69,7 @@ body {
 /* Formulaire */
 .form-group {
     text-align: left;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .form-group label {
@@ -113,6 +114,31 @@ body {
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
+/* Styles pour les 4 cases du Code PIN */
+.pin-container {
+    display: flex;
+    gap: 10px;
+}
+
+.pin-input {
+    width: 100%;
+    height: 50px;
+    background-color: #141416; /* Fond noir/sombre harmonisé */
+    border: 1px solid #2d2d34;
+    border-radius: 0;
+    color: #ffffff;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pin-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
 .auth-hint {
     font-size: 12px;
     color: #6b7280;
@@ -143,6 +169,7 @@ body {
     justify-content: center;
     gap: 8px;
     transition: background-color 0.2s ease, transform 0.1s ease;
+    margin-top: 8px;
 }
 
 .btn-submit:hover {
@@ -151,6 +178,24 @@ body {
 
 .btn-submit:active {
     transform: scale(0.99);
+}
+
+/* Lien de bascule (Créer un compte) */
+.auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #9ca3af;
+}
+
+.auth-switch a {
+    color: #6366f1;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
 }
 
 /* Pied de carte avec caractéristiques */
@@ -188,10 +233,4 @@ body {
 .feature-desc {
     font-size: 11px;
     color: #6b7280;
-}
-
-.logo-badge .logo-icon {
-    font-size: 22px;
-    color: white !important; 
-    margin: 0 !important;
 }

@@ -1,12 +1,9 @@
 import { supabase } from './supabaseClient.js';
 
-//Fonction pour hacher le code PIN en clair dans les champs de saisie
-
 /*
 La fonction hashPin combine le pseudo et le code PIN pour les transformer en une empreinte 
 cryptographique sécurisée (via SHA-256), évitant ainsi de stocker le code en clair dans la base de données.
 */
-
 async function hashPin(username, pin) {
     const encoder = new TextEncoder();
     const data = encoder.encode(username + "_" + pin);
@@ -101,7 +98,7 @@ async function handleSignup(e, errorMessage) {
     }
 }
 
-// Profile utilisateur et gestion de la session
+// Profil utilisateur et gestion de la session
 function checkUserSession() {
     const usernameDisplay = document.getElementById('username-display');
     const storedUser = localStorage.getItem('studyquest_user');
