@@ -51,14 +51,14 @@
                     <div class="streak-info">
                         <div class="streak-count">
                             <i class="fa-solid fa-fire" style="color: #f59e0b;"></i>
-                            <span><strong>5</strong> jours</span>
+                            <span><strong id="streak-count-display"></strong> jours</span>
                         </div>
                         <div class="streak-sub">
-                            <i class="fa-regular fa-snowflake" style="color: #38bdf8;"></i> Gels <strong>1/2</strong> Un gel sauve ta série si tu rates un jour
+                            <i class="fa-regular fa-snowflake" style="color: #38bdf8;"></i> Gels <strong id="freezes-display"></strong> Un gel sauve ta série si tu rates un jour
                         </div>
                     </div>
                     <div class="streak-actions">
-                        <span class="tasks-progress">1/2 tâches validées aujourd'hui</span>
+                        <span class="tasks-progress" id="tasks-progress-display"></span>
                         <div class="checkbox-mock">
                             <i class="fa-solid fa-check"></i>
                         </div>
@@ -68,40 +68,15 @@
                 <!-- Section Tâches -->
                 <div class="tasks-section">
                     <div class="tasks-tabs">
-                        <button class="tab-btn active">Aujourd'hui <span>4</span></button>
-                        <button class="tab-btn">À venir <span>2</span></button>
-                        <button class="tab-btn">Flexibles <span>1</span></button>
+                        <button class="tab-btn active">Aujourd'hui <span id="tasks-count-badge"></span></button>
+                        <button class="tab-btn">À venir <span></span></button>
+                        <button class="tab-btn">Flexibles <span></span></button>
                         <button class="add-task-btn"><i class="fa-solid fa-plus"></i> Ajouter</button>
                     </div>
 
-                    <div class="tasks-list">
-                        <div class="task-item completed">
-                            <div class="task-check"><i class="fa-solid fa-check"></i></div>
-                            <span class="task-name">Rendre le TP de chimie</span>
-                            <span class="task-tag school">École</span>
-                            <div class="task-actions"><i class="fa-solid fa-pen"></i> <i class="fa-solid fa-trash"></i></div>
-                        </div>
-                        <div class="task-item">
-                            <div class="task-check"></div>
-                            <span class="task-name">Réviser le chapitre 4 de maths</span>
-                            <span class="task-tag school">École</span>
-                            <div class="task-actions"><i class="fa-solid fa-pen"></i> <i class="fa-solid fa-trash"></i></div>
-                        </div>
-                        <div class="task-item">
-                            <div class="task-check"></div>
-                            <span class="task-name">Aller courir 30 minutes</span>
-                            <span class="task-tag perso">Perso</span>
-                            <div class="task-actions"><i class="fa-solid fa-pen"></i> <i class="fa-solid fa-trash"></i></div>
-                        </div>
-                        <div class="task-item missed">
-                            <div class="task-check"></div>
-                            <div class="task-details">
-                                <span class="task-name">Appeler la bibliothèque</span>
-                                <span class="task-subtext">Manquée hier, tu peux la refaire</span>
-                            </div>
-                            <span class="task-tag missed-tag">Manquée</span>
-                            <div class="task-actions"><i class="fa-solid fa-pen"></i> <i class="fa-solid fa-trash"></i></div>
-                        </div>
+                    <!-- Conteneur dynamique des tâches (affiche les tâches ou le message par défaut s'il n'y en a pas) -->
+                    <div class="tasks-list" id="tasks-container">
+                        <!-- Injection dynamique JS -->
                     </div>
                 </div>
             </div>
@@ -113,21 +88,23 @@
                 <div class="bento-card stats-card">
                     <h3>Mes statistiques</h3>
                     <div class="stat-big">
-                        <span class="stat-number">74</span>
+                        <span class="stat-number" id="total-tasks-stat"></span>
                         <span class="stat-label">tâches validées depuis le début</span>
                     </div>
                     <div class="stat-row">
                         <span>Record de série</span>
-                        <strong>12 jours</strong>
+                        <strong id="record-streak-stat"></strong>
                     </div>
                     <div class="stat-row">
                         <span>Série actuelle</span>
-                        <strong>5 jours</strong>
+                        <strong id="current-streak-stat"></strong>
                     </div>
                     <div class="stat-progress-block">
                         <span>Prochain gel</span>
-                        <span>5 / 7 jours</span>
-                        <div class="progress-bar"><div class="progress-fill" style="width: 70%;"></div></div>
+                        <span id="gel-progress-text"></span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="gel-progress-fill" style="width: 0%;"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -135,32 +112,14 @@
                 <div class="bento-card groups-card">
                     <div class="groups-header">
                         <h3>Mes groupes</h3>
-                        <span class="groups-count">3</span>
+                        <span class="groups-count" id="groups-count-badge"></span>
                     </div>
-                    <div class="group-item">
-                        <span class="group-badge-rank rank-other">4e</span>
-                        <div class="group-info">
-                            <strong>Les Révisionnistes</strong>
-                            <small>7 / 10 membres</small>
-                        </div>
-                        <i class="fa-solid fa-chevron-right"></i>
+                    
+                    <!-- Conteneur dynamique des groupes (affiche les groupes ou le message par défaut s'il n'y en a pas) -->
+                    <div id="groups-container">
+                        <!-- Injection dynamique JS -->
                     </div>
-                    <div class="group-item">
-                        <span class="group-badge-rank rank-other">2e</span>
-                        <div class="group-info">
-                            <strong>Promo LOG 2026</strong>
-                            <small>10 / 10 membres, complet</small>
-                        </div>
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </div>
-                    <div class="group-item">
-                        <span class="group-badge-rank rank-first">1er</span>
-                        <div class="group-info">
-                            <strong>Volley du jeudi</strong>
-                            <small>5 / 10 membres</small>
-                        </div>
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </div>
+
                     <button class="join-group-btn"><i class="fa-solid fa-plus"></i> Rejoindre un groupe</button>
                 </div>
 
@@ -171,5 +130,7 @@
 
     <!-- Module JS d'authentification et de gestion de session -->
     <script type="module" src="../js/auth.js"></script>
+    <!-- Module JS de la page d'accueil -->
+    <script type="module" src="../js/accueil.js"></script>
 </body>
 </html>

@@ -26,44 +26,48 @@ async function loadAccueilData() {
         if (profileError) throw profileError;
 
         if (profile) {
-            //Carte série
-            const streakCountEl = document.querySelector('.streak-count strong');
-            if (streakCountEl) streakCountEl.textContent = profile.current_streak ?? 0;
+            // Carte Série
+            const streakCount = document.getElementById('streak-count-display');
+            if (streakCount) streakCount.textContent = profile.current_streak ?? 0;
 
-            const streakSubEl = document.querySelector('.streak-sub');
-            if (streakSubEl) {
-                streakSubEl.innerHTML = `<i class="fa-regular fa-snowflake" style="color: #38bdf8;"></i> Gels <strong>${profile.freezes_count ?? 0}/2</strong> Un gel sauve ta série si tu rates un jour`;
+            const freezes = document.getElementById('freezes-display');
+            if (freezes) freezes.textContent = `${profile.freezes_count ?? 0}/2`;
+
+            const tasksProgress = document.getElementById('tasks-progress-display');
+            if (tasksProgress) {
+                tasksProgress.textContent = `${profile.total_completed_tasks ?? 0} tâches validées depuis le début`;
             }
 
-            // Carte statistiques
-            const statNumberEl = document.querySelector('.stat-number');
-            if (statNumberEl) statNumberEl.textContent = profile.total_completed_tasks ?? 0;
+            // Carte Statistiques
+            const totalTasksStat = document.getElementById('total-tasks-stat');
+            if (totalTasksStat) totalTasksStat.textContent = profile.total_completed_tasks ?? 0;
 
-            const statRows = document.querySelectorAll('.stat-row');
-            if (statRows.length >= 2) {
-                const recordRow = statRows[0].querySelector('strong');
-                const currentStreakRow = statRows[1].querySelector('strong');
-                
-                if (recordRow) recordRow.textContent = `${profile.longest_streak ?? 0} jours`;
-                if (currentStreakRow) currentStreakRow.textContent = `${profile.current_streak ?? 0} jours`;
-            }
+            const recordStreak = document.getElementById('record-streak-stat');
+            if (recordStreak) recordStreak.textContent = `${profile.longest_streak ?? 0} jours`;
+
+            const currentStreak = document.getElementById('current-streak-stat');
+            if (currentStreak) currentStreak.textContent = `${profile.current_streak ?? 0} jours`;
         }
 
         // Charger les tâches de l'utilisateur depuis Supabase
         let { data: tasks, error: tasksError } = await supabase
             .from('tasks')
             .select('*')
-            .eq('username', localUser.username); // Adapte selon ta liaison 
+            .eq('username', localUser.username);
 
         const tasksContainer = document.getElementById('tasks-container');
+        const tasksCountBadge = document.getElementById('tasks-count-badge');
+
         if (tasksContainer) {
             if (tasksError || !tasks || tasks.length === 0) {
+                if (tasksCountBadge) tasksCountBadge.textContent = "0";
                 tasksContainer.innerHTML = `
                     <div style="padding: 30px; text-align: center; color: #9ca3af; font-size: 0.95rem;">
                         Vous n'avez pas de tâches aujourd'hui
                     </div>
                 `;
             } else {
+                if (tasksCountBadge) tasksCountBadge.textContent = tasks.length;
                 tasksContainer.innerHTML = tasks.map(task => `
                     <div class="task-item ${task.completed ? 'completed' : ''}">
                         <div class="task-check"><i class="fa-solid fa-check"></i></div>
@@ -78,11 +82,11 @@ async function loadAccueilData() {
         // Charge les groupes de l'utilisateur depuis Supabase
         let { data: groups, error: groupsError } = await supabase
             .from('group_members')
-            .select('groups(*)') // Ajuste selon ton schéma relationnel Supabase
+            .select('groups(*)')
             .eq('username', localUser.username);
 
         const groupsContainer = document.getElementById('groups-container');
-        const groupsCountBadge = document.querySelector('.groups-count');
+        const groupsCountBadge = document.getElementById('groups-count-badge');
 
         if (groupsContainer) {
             if (groupsError || !groups || groups.length === 0) {
