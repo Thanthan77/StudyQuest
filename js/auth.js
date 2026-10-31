@@ -90,7 +90,7 @@ async function handleSignup(e, errorMessage) {
         if (insertError) throw insertError;
 
         localStorage.setItem('studyquest_user', JSON.stringify(newProfile));
-        window.location.href = '../accueil.html';
+        window.location.href = 'accueil.html';
 
     } catch (err) {
         console.error("Erreur d'inscription :", err.message);
