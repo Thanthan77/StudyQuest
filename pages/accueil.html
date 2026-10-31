@@ -4,32 +4,172 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StudyQuest - Accueil</title>
-    <link rel="stylesheet" href="../css/components/login.css"> 
+    <!-- Lien vers ton fichier CSS principal de la grille / dashboard -->
+    <link rel="stylesheet" href="../css/components/accueil.css"> 
+    <!-- FontAwesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="app-body">
 
-            <div class="logo-badge" style="margin-bottom: 24px;">
-                <i class="fa-solid fa-check logo-icon" style="color: #4ade80;"></i>
+    <!-- Barre latérale (Sidebar) -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-logo">StudyQuest</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="accueil.html" class="nav-item active"><i class="fa-solid fa-house"></i> Accueil</a>
+            <a href="groups.html" class="nav-item"><i class="fa-solid fa-user-group"></i> Mes groupes</a>
+            <a href="statistiques.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Statistiques</a>
+        </nav>
+        <div class="sidebar-footer">
+            <button id="logout-btn" class="logout-btn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Contenu principal (Grille Bento) -->
+    <main class="main-content">
+        
+        <!-- En-tête -->
+        <header class="dashboard-header">
+            <h1 class="welcome-title">Bonjour <span id="username-display">Utilisateur</span></h1>
+            <div class="timer-badge">
+                <i class="fa-solid fa-triangle-exclamation"></i> Minuit dans 4h 50m
+            </div>
+        </header>
+
+        <!-- Grille Bento principale -->
+        <div class="bento-grid">
+            
+            <!-- Colonne de Gauche (Séries & Tâches) -->
+            <div class="bento-left">
+                <!-- Carte Série / Streak -->
+                <div class="streak-card">
+                    <div class="streak-info">
+                        <div class="streak-count">
+                            <i class="fa-solid fa-fire" style="color: #f59e0b;"></i>
+                            <span><strong>5</strong> jours</span>
+                        </div>
+                        <div class="streak-sub">
+                            <i class="fa-regular fa-snowflake" style="color: #38bdf8;"></i> Gels <strong>1/2</strong> Un gel sauve ta série si tu rates un jour
+                        </div>
+                    </div>
+                    <div class="streak-actions">
+                        <span class="tasks-progress">1/2 tâches validées aujourd'hui</span>
+                        <div class="checkbox-mock">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Tâches -->
+                <div class="tasks-section">
+                    <div class="tasks-tabs">
+                        <button class="tab-btn active">Aujourd'hui <span>4</span></button>
+                        <button class="tab-btn">À venir <span>2</span></button>
+                        <button class="tab-btn">Flexibles <span>1</span></button>
+                        <button class="add-task-btn"><i class="fa-solid fa-plus"></i> Ajouter</button>
+                    </div>
+
+                    <div class="tasks-list">
+                        <div class="task-item completed">
+                            <div class="task-check"><i class="fa-solid fa-check"></i></div>
+                            <span class="task-name">Rendre le TP de chimie</span>
+                            <span class="task-tag school">École</span>
+                            <div class="task-actions"><i class="fa-solid fa-pen"></i> <i class="fa-solid fa-trash"></i></div>
+                        </div>
+                        <div class="task-item">
+                            <div class="task-check"></div>
+                            <span class="task-name">Réviser le chapitre 4 de maths</span>
+                            <span class="task-tag school">École</span>
+                            <div class="task-actions"><i class="fa-solid fa-pen"></i> <i class="fa-solid fa-trash"></i></div>
+                        </div>
+                        <div class="task-item">
+                            <div class="task-check"></div>
+                            <span class="task-name">Aller courir 30 minutes</span>
+                            <span class="task-tag perso">Perso</span>
+                            <div class="task-actions"><i class="fa-solid fa-pen"></i> <i class="fa-solid fa-trash"></i></div>
+                        </div>
+                        <div class="task-item missed">
+                            <div class="task-check"></div>
+                            <div class="task-details">
+                                <span class="task-name">Appeler la bibliothèque</span>
+                                <span class="task-subtext">Manquée hier, tu peux la refaire</span>
+                            </div>
+                            <span class="task-tag missed-tag">Manquée</span>
+                            <div class="task-actions"><i class="fa-solid fa-pen"></i> <i class="fa-solid fa-trash"></i></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <h1 class="brand-title" style="margin-bottom: 12px;">Bravo !</h1>
-            <p class="brand-subtitle" style="font-size: 16px; margin-bottom: 24px;">
-                Vous êtes connecté en tant que <strong id="username-display" style="color: #6366f1;">Utilisateur</strong>.
-            </p>
+            <!-- Colonne de Droite (Statistiques & Groupes) -->
+            <div class="bento-right">
+                
+                <!-- Carte Statistiques -->
+                <div class="bento-card stats-card">
+                    <h3>Mes statistiques</h3>
+                    <div class="stat-big">
+                        <span class="stat-number">74</span>
+                        <span class="stat-label">tâches validées depuis le début</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Record de série</span>
+                        <strong>12 jours</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>Série actuelle</span>
+                        <strong>5 jours</strong>
+                    </div>
+                    <div class="stat-progress-block">
+                        <span>Prochain gel</span>
+                        <span>5 / 7 jours</span>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 70%;"></div></div>
+                    </div>
+                </div>
 
-            <p class="auth-hint" style="text-align: center; margin-bottom: 24px;">
-                Bienvenue sur StudyQuest. La suite de ton tableau de bord arrive bientôt ici !
-            </p>
+                <!-- Carte Groupes -->
+                <div class="bento-card groups-card">
+                    <div class="groups-header">
+                        <h3>Mes groupes</h3>
+                        <span class="groups-count">3</span>
+                    </div>
+                    <div class="group-item">
+                        <span class="group-badge-rank rank-other">4e</span>
+                        <div class="group-info">
+                            <strong>Les Révisionnistes</strong>
+                            <small>7 / 10 membres</small>
+                        </div>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                    <div class="group-item">
+                        <span class="group-badge-rank rank-other">2e</span>
+                        <div class="group-info">
+                            <strong>Promo LOG 2026</strong>
+                            <small>10 / 10 membres, complet</small>
+                        </div>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                    <div class="group-item">
+                        <span class="group-badge-rank rank-first">1er</span>
+                        <div class="group-info">
+                            <strong>Volley du jeudi</strong>
+                            <small>5 / 10 membres</small>
+                        </div>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                    <button class="join-group-btn"><i class="fa-solid fa-plus"></i> Rejoindre un groupe</button>
+                </div>
 
-            <button id="logout-btn" class="btn-submit" style="background-color: #2d2d34; color: #9ca3af;">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                <span>Se déconnecter</span>
-            </button>
+            </div>
 
         </div>
     </main>
-<script type="module" src="../js/auth.js"></script>
+
+    <!-- Module JS d'authentification et de gestion de session -->
+    <script type="module" src="../js/auth.js"></script>
 </body>
 </html>
