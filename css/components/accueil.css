@@ -317,6 +317,7 @@ body.app-body {
 .progress-fill { 
     height: 100%; 
     background: #6366f1; 
+    width: 0%;
 }
 
 /* Groupes */
@@ -384,7 +385,171 @@ body.app-body {
     margin-top: 10px; 
     text-align: center;
 }
-.join-group-btn:hover { background: rgba(99, 102, 241, 0.05); }
+.join-group-btn:hover { 
+    background: rgba(99, 102, 241, 0.05); 
+}
+
+.streak-icon{
+    color: #f59e0b;
+}
+
+.gel-Icon{
+    color: #38bdf8;
+}
+
+/* Overlay de la modale */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+    display: none; /* Masqué par défaut */
+}
+
+/* Boîte de dialogue */
+.modal-content {
+    background-color: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 0; /* Coins strictement carrés comme demandé précédemment */
+    width: 100%;
+    max-width: 480px;
+    padding: 24px;
+    color: #f4f4f5;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #a1a1aa;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+.close-btn:hover {
+    color: #fff;
+}
+
+/* Formulaires & Champs */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #d4d4d8;
+    margin-bottom: 8px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"] {
+    width: 100%;
+    background-color: #09090b;
+    border: 1px solid #27272a;
+    border-radius: 0;
+    padding: 10px 14px;
+    color: #fff;
+    font-size: 0.95rem;
+    outline: none;
+}
+.form-group input:focus {
+    border-color: #6366f1;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-group.half {
+    flex: 1;
+}
+
+/* Boutons à bascule (Toggle) "Un jour précis / Quand je veux" */
+.toggle-options, .category-options {
+    display: flex;
+    background-color: #09090b;
+    border: 1px solid #27272a;
+    padding: 3px;
+}
+
+.toggle-btn, .category-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.toggle-btn.active, .category-btn.active {
+    background-color: #6366f1;
+    color: #fff;
+}
+
+/* Boutons d'action finaux */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-primary {
+    flex: 2;
+    background-color: #6366f1;
+    color: #fff;
+    border: none;
+    padding: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 0;
+}
+.btn-primary:hover {
+    background-color: #4f46e5;
+}
+
+.btn-secondary {
+    flex: 1;
+    background-color: transparent;
+    border: 1px solid #27272a;
+    color: #f4f4f5;
+    padding: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 0;
+}
+.btn-secondary:hover {
+    background-color: #27272a;
+}
 
 /* Ajustement automatique pour les écrans PC portables ou écrans larges */
 @media (min-width: 769px) {

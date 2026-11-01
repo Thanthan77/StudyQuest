@@ -50,11 +50,11 @@
                 <div class="streak-card">
                     <div class="streak-info">
                         <div class="streak-count">
-                            <i class="fa-solid fa-fire" style="color: #f59e0b;"></i>
+                            <i class="fa-solid fa-fire streak-icon"></i>
                             <span><strong id="streak-count-display"></strong> jours</span>
                         </div>
                         <div class="streak-sub">
-                            <i class="fa-regular fa-snowflake" style="color: #38bdf8;"></i> Gels <strong id="freezes-display"></strong> Un gel sauve ta série si tu rates un jour
+                            <i class="fa-regular fa-snowflake gel-Icon"></i> Gels <strong id="freezes-display"></strong> Un gel sauve ta série si tu rates un jour
                         </div>
                     </div>
                     <div class="streak-actions">
@@ -103,7 +103,7 @@
                         <span>Prochain gel</span>
                         <span id="gel-progress-text"></span>
                         <div class="progress-bar">
-                            <div class="progress-fill" id="gel-progress-fill" style="width: 0%;"></div>
+                            <div class="progress-fill" id="gel-progress-fill"></div>
                         </div>
                     </div>
                 </div>
@@ -127,6 +127,61 @@
 
         </div>
     </main>
+
+     <!-- Modal d'ajout de tâche -->
+<div id="task-modal" class="modal-overlay" >
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Nouvelle tâche</h2>
+            <button id="close-modal-btn" class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <form id="add-task-form">
+            <div class="form-group">
+                <label>Que veux-tu faire ?</label>
+                <input type="text" id="task-title-input" placeholder="Ex. : Relire le cours d'anglais" required autocomplete="off">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group half">
+                    <label>Quand</label>
+                    <div class="toggle-options">
+                        <button type="button" class="toggle-btn active" data-when="specific">
+                            <i class="fa-regular fa-calendar"></i> Un jour précis
+                        </button>
+                        <button type="button" class="toggle-btn" data-when="flexible">
+                            <i class="fa-solid fa-layer-group"></i> Quand je veux
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group half" id="date-container">
+                    <label>Date</label>
+                    <div class="input-with-icon">
+                        <input type="date" id="task-date-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Catégorie</label>
+                <div class="category-options">
+                    <button type="button" class="category-btn active" data-category="school">
+                        <i class="fa-solid fa-book"></i> École
+                    </button>
+                    <button type="button" class="category-btn" data-category="perso">
+                        <i class="fa-solid fa-user"></i> Personnel
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="submit" class="btn-primary">Ajouter la tâche</button>
+                <button type="button" id="cancel-modal-btn" class="btn-secondary">Annuler</button>
+            </div>
+        </form>
+    </div>
+</div>
 
     <!-- Module JS d'authentification et de gestion de session -->
     <script type="module" src="../js/auth.js"></script>
