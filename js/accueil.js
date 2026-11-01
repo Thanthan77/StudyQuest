@@ -20,7 +20,7 @@ async function loadAccueilData() {
         let { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('*')
-            .eq('username', localUser.username)
+            .eq('id', localUser.id)
             .single();
 
         if (profileError) throw profileError;
@@ -53,7 +53,7 @@ async function loadAccueilData() {
         let { data: tasks, error: tasksError } = await supabase
             .from('tasks')
             .select('*')
-            .eq('username', localUser.username);
+            .eq('user_id', localUser.id);
 
         const tasksContainer = document.getElementById('tasks-container');
         const tasksCountBadge = document.getElementById('tasks-count-badge');
@@ -83,7 +83,7 @@ async function loadAccueilData() {
         let { data: groups, error: groupsError } = await supabase
             .from('group_members')
             .select('groups(*)')
-            .eq('username', localUser.username);
+            .eq('user_id', localUser.id);
 
         const groupsContainer = document.getElementById('groups-container');
         const groupsCountBadge = document.getElementById('groups-count-badge');
