@@ -152,7 +152,7 @@ function startMidnightCountdown() {
 }
 
 // Gestion du modal d'ajout de tâche
- function initTaskModal(onTaskAddedCallback) {
+function initTaskModal(onTaskAddedCallback) {
     const modal = document.getElementById('task-modal');
     const openModalBtn = document.querySelector('.add-task-btn');
     const closeModalBtn = document.getElementById('close-modal-btn');
@@ -211,17 +211,18 @@ function startMidnightCountdown() {
         addTaskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Récupération de l'utilisateur connecté via Supabase Auth (si tu utilises le Auth natif)
-            const { data: { user }, error: authError } = await supabase.auth.getUser();
-            
-            // Fallback sur le localStorage si tu n'utilises pas Supabase Auth
-            let userId = user ? user.id : null;
+           // Récupération directe de l'ID depuis le localStorage
+            let userId = null;
+            const storedUser = localStorage.getItem('studyquest_user');
+            if (storedUser) {
+                const localUser = JSON.parse(storedUser);
+                userId = localUser.id; // C'est le même UUID que dans profiles
+            }
 
             if (!userId) {
                 alert("Erreur : Aucun utilisateur connecté.");
                 return;
             }
-
             const titleInput = document.getElementById('task-title-input');
             const dateInput = document.getElementById('task-date-input');
 
