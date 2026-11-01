@@ -152,7 +152,7 @@ function startMidnightCountdown() {
 }
 
 // Gestion du modal d'ajout de tâche
-export function initTaskModal(onTaskAddedCallback) {
+ function initTaskModal(onTaskAddedCallback) {
     const modal = document.getElementById('task-modal');
     const openModalBtn = document.querySelector('.add-task-btn');
     const closeModalBtn = document.getElementById('close-modal-btn');
