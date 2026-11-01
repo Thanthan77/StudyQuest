@@ -151,26 +151,23 @@ function startMidnightCountdown() {
     setInterval(updateTimer, 1000);
 }
 
-//Gestion de la modale d'ajout de tâche
-function initTaskModal(onTaskAddedCallback) {
+// Gestion du modal d'ajout de tâche
+export function initTaskModal(onTaskAddedCallback) {
     const modal = document.getElementById('task-modal');
     const openModalBtn = document.querySelector('.add-task-btn');
     const closeModalBtn = document.getElementById('close-modal-btn');
     const cancelModalBtn = document.getElementById('cancel-modal-btn');
     const addTaskForm = document.getElementById('add-task-form');
 
-    // États par défaut conformes aux contraintes SQL ('dated' / 'flexible' et 'school' / 'personal')
     let selectedTaskType = 'dated'; 
     let selectedCategory = 'school'; 
 
-    // Ouvrir la modale
     if (openModalBtn) {
         openModalBtn.addEventListener('click', () => {
             if (modal) modal.style.display = 'flex';
         });
     }
 
-    // Fermer la modale
     function closeModal() {
         if (modal) {
             modal.style.display = 'none';
@@ -180,7 +177,6 @@ function initTaskModal(onTaskAddedCallback) {
     if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
     if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
 
-    // Gestion des boutons "Un jour précis" / "Quand je veux"
     const toggleBtns = document.querySelectorAll('.toggle-btn');
     const dateContainer = document.getElementById('date-container');
 
@@ -190,7 +186,6 @@ function initTaskModal(onTaskAddedCallback) {
             btn.classList.add('active');
             
             const when = btn.getAttribute('data-when');
-            // Correspondance avec le check constraint de la base de données ('dated' ou 'flexible')
             selectedTaskType = (when === 'specific') ? 'dated' : 'flexible';
             
             if (selectedTaskType === 'flexible') {
@@ -201,7 +196,6 @@ function initTaskModal(onTaskAddedCallback) {
         });
     });
 
-    // Gestion des boutons de catégorie "École" / "Personnel"
     const categoryBtns = document.querySelectorAll('.category-btn');
     categoryBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -209,19 +203,24 @@ function initTaskModal(onTaskAddedCallback) {
             btn.classList.add('active');
             
             const cat = btn.getAttribute('data-category');
-            // Correspondance avec le check constraint de la base de données ('school' ou 'personal')
             selectedCategory = (cat === 'perso') ? 'personal' : 'school';
         });
     });
 
-    // Soumission du formulaire d'ajout vers Supabase
     if (addTaskForm) {
         addTaskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const storedUser = localStorage.getItem('studyquest_user');
-            if (!storedUser) return;
-            const localUser = JSON.parse(storedUser);
+            // Récupération de l'utilisateur connecté via Supabase Auth (si tu utilises le Auth natif)
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            
+            // Fallback sur le localStorage si tu n'utilises pas Supabase Auth
+            let userId = user ? user.id : null;
+
+            if (!userId) {
+                alert("Erreur : Aucun utilisateur connecté.");
+                return;
+            }
 
             const titleInput = document.getElementById('task-title-input');
             const dateInput = document.getElementById('task-date-input');
@@ -230,23 +229,21 @@ function initTaskModal(onTaskAddedCallback) {
             const dueDate = selectedTaskType === 'dated' ? dateInput.value : null;
 
             try {
-                // Insertion respectant strictement les colonnes et contraintes de la table SQL
                 const { error } = await supabase
                     .from('tasks')
                     .insert([
                         {
-                            user_id: localUser.id,         // UUID de l'utilisateur (requis par la FK et le RLS)
+                            user_id: userId,
                             title: taskTitle,
-                            task_type: selectedTaskType,   // 'dated' ou 'flexible'
-                            due_date: dueDate || null,     // Date au format YYYY-MM-DD ou null
-                            status: 'pending',             // Par défaut 'pending' selon ton schéma
-                            category: selectedCategory     // 'school' ou 'personal'
+                            task_type: selectedTaskType,
+                            due_date: dueDate || null,
+                            status: 'pending',
+                            category: selectedCategory
                         }
                     ]);
 
                 if (error) throw error;
 
-                // Fermer la modale et recharger les données
                 closeModal();
                 if (typeof onTaskAddedCallback === 'function') {
                     onTaskAddedCallback();
@@ -259,7 +256,6 @@ function initTaskModal(onTaskAddedCallback) {
         });
     }
 }
-
 // Lancer le chargement au chargement du DOM si on est sur la page d'accueil
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('username-display')) {
