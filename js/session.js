@@ -1,3 +1,4 @@
+import { supabase } from './supabaseClient.js';
 export async function loadAccueilData() {
     // Récupérer l'utilisateur connecté depuis le localStorage
     const storedUser = localStorage.getItem('studyquest_user');

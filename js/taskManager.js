@@ -1,5 +1,5 @@
+import { supabase } from './supabaseClient.js';
 // Module gestion des tâches
-
 export function initTasksModule(onDataChangeCallback) {
     const modal = document.getElementById('task-modal');
     const openModalBtn = document.querySelector('.add-task-btn');
