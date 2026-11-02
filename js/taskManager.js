@@ -194,10 +194,16 @@ export function initTasksModule(onDataChangeCallback) {
                 const newStatus = isCompleted ? 'pending' : 'completed';
                 
                 try {
+                    // Définir la date de complétion : horodatage ISO du jour si complété, ou null si remis en pending
+                    const completedAtValue = (newStatus === 'completed') ? new Date().toISOString() : null;
+
                     const { error: taskError } = await supabase
-                        .from('tasks')
-                        .update({ status: newStatus })
-                        .eq('id', taskId);
+                    .from('tasks')
+                    .update({ 
+                        status: newStatus,
+                        completed_at: completedAtValue 
+                    })
+                    .eq('id', taskId);
 
                     if (taskError) throw taskError;
 
