@@ -216,15 +216,15 @@ body.app-body {
 .task-check { 
     width: 20px; 
     height: 20px; 
-    border: 2px solid #6b7280; 
+    border: 2px solid #cbd5e1;
     display: flex; 
     align-items: center; 
     justify-content: center; 
 }
 .task-item.completed .task-check { 
-    background-color: #22c55e; 
-    border-color: #22c55e; 
-    color: #fff; 
+    background-color: #10b981;
+    border-color: #10b981;
+    color: white; 
 }
 .task-item.completed .task-name { 
     text-decoration: line-through; 

@@ -66,15 +66,28 @@ export async function loadAccueilData() {
                     </div>
                 `;
             } else {
-                if (tasksCountBadge) tasksCountBadge.textContent = tasks.length;
-                tasksContainer.innerHTML = tasks.map(task => `
-                    <div class="task-item ${task.completed ? 'completed' : ''}">
-                        <div class="task-check"><i class="fa-solid fa-check"></i></div>
-                        <span class="task-name">${task.title}</span>
-                        <span class="task-tag ${task.tag_class || 'school'}">${task.tag_name || 'École'}</span>
-                        <div class="task-actions"><i class="fa-solid fa-pen"></i> <i class="fa-solid fa-trash"></i></div>
-                    </div>
-                `).join('');
+                if (tasksCountBadge){ 
+                    tasksCountBadge.textContent = tasks.length; 
+                }
+                tasksContainer.innerHTML = tasks.map(task => {
+                    const isCompleted = task.status === 'completed';
+                    const isSchool = task.category === 'school';
+                    const tagName = isSchool ? 'École' : 'Perso';
+                    const tagClass = isSchool ? 'school' : 'perso';
+
+                    return `
+                        <div class="task-item ${isCompleted ? 'completed' : ''}" data-id="${task.id}">
+                            <div class="task-check">
+                                ${isCompleted ? '<i class="fa-solid fa-check"></i>' : ''}
+                            </div>
+                            <span class="task-name">${task.title}</span>
+                            <span class="task-tag ${tagClass}">${tagName}</span>
+                            <div class="task-actions">
+                                <i class="fa-solid fa-pen edit-task-btn"></i> 
+                                <i class="fa-solid fa-trash delete-task-btn"></i>
+                            </div>
+                        </div>`;
+                    }).join('');
             }
         }
 
