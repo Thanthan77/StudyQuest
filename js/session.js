@@ -34,7 +34,7 @@ export async function loadAccueilData() {
 
             const tasksProgress = document.getElementById('tasks-progress-display');
             if (tasksProgress) {
-                tasksProgress.textContent = `${profile.total_completed_tasks ?? 0} tâches validées depuis le début`;
+                tasksProgress.textContent = `${profile.total_completed_tasks ?? 0}/2 tâches validées depuis aujourd'hui`;
             }
 
             // Carte Statistiques

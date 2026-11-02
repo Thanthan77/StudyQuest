@@ -112,7 +112,7 @@ export function initTasksModule(onDataChangeCallback) {
             const taskId = taskItem.getAttribute('data-id');
 
             
-            // Terminer / Cocher
+        // Terminer / Cocher
         if (e.target.closest('.task-check')) {
             const isCompleted = taskItem.classList.contains('completed');
             const newStatus = isCompleted ? 'pending' : 'completed';
