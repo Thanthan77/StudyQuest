@@ -158,6 +158,35 @@ export function initTasksModule(onDataChangeCallback) {
             }
         }
 
+        // On compte combien de tâches ont la classe 'completed' sur toute la page
+        const completedCount = document.querySelectorAll('.task-item.completed').length;
+
+        const box1 = document.getElementById('mini-box-1');
+        const box2 = document.getElementById('mini-box-2');
+
+
+        // Cocher le 1er carré si au moins 1 tâche est finie
+        if (box1) {
+            if (completedCount >= 1) {
+                box1.classList.add('checked');
+                box1.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else {
+                box1.classList.remove('checked');
+                box1.innerHTML = '';
+            }
+        }
+
+        // Cocher le 2ème carré si au moins 2 tâches sont finies
+        if (box2) {
+            if (completedCount >= 2) {
+                box2.classList.add('checked');
+                box2.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else {
+                box2.classList.remove('checked');
+                box2.innerHTML = '';
+            }
+        }
+
         //  Rafraîchir l'interface pour afficher les nouvelles stats et le nouveau statut
         if (typeof onDataChangeCallback === 'function') onDataChangeCallback();
 
