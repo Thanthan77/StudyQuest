@@ -111,24 +111,60 @@ export function initTasksModule(onDataChangeCallback) {
             
             const taskId = taskItem.getAttribute('data-id');
 
+            
             // Terminer / Cocher
-            if (e.target.closest('.task-check')) {
-                const isCompleted = taskItem.classList.contains('completed');
-                const newStatus = isCompleted ? 'pending' : 'completed';
+        if (e.target.closest('.task-check')) {
+            const isCompleted = taskItem.classList.contains('completed');
+            const newStatus = isCompleted ? 'pending' : 'completed';
+        try {
+        // Mettre à jour le statut de la tâche dans la table 'tasks'
+        const { error: taskError } = await supabase
+            .from('tasks')
+            .update({ status: newStatus })
+            .eq('id', taskId);
 
-                try {
-                    const { error } = await supabase
-                        .from('tasks')
-                        .update({ status: newStatus })
-                        .eq('id', taskId);
+        if (taskError) throw taskError;
 
-                    if (error) throw error;
-                    if (typeof onDataChangeCallback === 'function') onDataChangeCallback();
-                } catch (err) {
-                    console.error("Erreur mise à jour statut :", err.message);
-                }
+        // Récupérer l'ID utilisateur depuis le localStorage
+        let userId = null;
+        const storedUser = localStorage.getItem('studyquest_user');
+        if (storedUser) {
+            userId = JSON.parse(storedUser).id;
+        }
+
+        if (userId) {
+            // Récupérer le total actuel des tâches complétées dans la table 'profiles'
+            const { data: profileData, error: profileFetchError } = await supabase
+                .from('profiles')
+                .select('total_completed_tasks')
+                .eq('id', userId)
+                .single();
+
+            if (!profileFetchError && profileData) {
+                let currentTotal = profileData.total_completed_tasks || 0;
+                
+                // Calculer le nouveau total en fonction du nouveau statut de la tâche
+                let newTotal = newStatus === 'completed' 
+                    ? currentTotal + 1 
+                    : Math.max(0, currentTotal - 1);
+
+                // Mettre à jour la table 'profiles' avec le nouveau total
+                const { error: profileUpdateError } = await supabase
+                    .from('profiles')
+                    .update({ total_completed_tasks: newTotal })
+                    .eq('id', userId);
+
+                if (profileUpdateError) throw profileUpdateError;
             }
+        }
 
+        //  Rafraîchir l'interface pour afficher les nouvelles stats et le nouveau statut
+        if (typeof onDataChangeCallback === 'function') onDataChangeCallback();
+
+    } catch (err) {
+        console.error("Erreur lors de la mise à jour du statut ou du profil :", err.message);
+    }
+}
             // Supprimer
             if (e.target.closest('.delete-task-btn')) {
                 if (confirm("Supprimer cette tâche ?")) {
