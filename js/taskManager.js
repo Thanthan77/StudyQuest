@@ -11,7 +11,7 @@ export function initTasksModule(onDataChangeCallback) {
     let selectedTaskType = 'dated'; 
     let selectedCategory = 'school'; 
 
-    //  Gestion de l'ouverture et fermeture du modal
+    // Gestion de l'ouverture et fermeture du modal
     if (openModalBtn) {
         openModalBtn.addEventListener('click', () => {
             if (modal) modal.style.display = 'flex';
@@ -57,7 +57,7 @@ export function initTasksModule(onDataChangeCallback) {
         });
     });
 
-    //  Ajout d'une tâche via le formulaire
+    // Ajout d'une tâche via le formulaire
     if (addTaskForm) {
         addTaskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -111,89 +111,91 @@ export function initTasksModule(onDataChangeCallback) {
             
             const taskId = taskItem.getAttribute('data-id');
 
-            
-        // Terminer / Cocher
-        if (e.target.closest('.task-check')) {
-            const isCompleted = taskItem.classList.contains('completed');
-            const newStatus = isCompleted ? 'pending' : 'completed';
-        try {
-        // Mettre à jour le statut de la tâche dans la table 'tasks'
-        const { error: taskError } = await supabase
-            .from('tasks')
-            .update({ status: newStatus })
-            .eq('id', taskId);
-
-        if (taskError) throw taskError;
-
-        // Récupérer l'ID utilisateur depuis le localStorage
-        let userId = null;
-        const storedUser = localStorage.getItem('studyquest_user');
-        if (storedUser) {
-            userId = JSON.parse(storedUser).id;
-        }
-
-        if (userId) {
-            // Récupérer le total actuel des tâches complétées dans la table 'profiles'
-            const { data: profileData, error: profileFetchError } = await supabase
-                .from('profiles')
-                .select('total_completed_tasks')
-                .eq('id', userId)
-                .single();
-
-            if (!profileFetchError && profileData) {
-                let currentTotal = profileData.total_completed_tasks || 0;
+            // Terminer / Cocher
+            if (e.target.closest('.task-check')) {
+                const isCompleted = taskItem.classList.contains('completed');
+                const newStatus = isCompleted ? 'pending' : 'completed';
                 
-                // Calculer le nouveau total en fonction du nouveau statut de la tâche
-                let newTotal = newStatus === 'completed' 
-                    ? currentTotal + 1 
-                    : Math.max(0, currentTotal - 1);
+                try {
+                    // Mettre à jour le statut de la tâche dans la table 'tasks'
+                    const { error: taskError } = await supabase
+                        .from('tasks')
+                        .update({ status: newStatus })
+                        .eq('id', taskId);
 
-                // Mettre à jour la table 'profiles' avec le nouveau total
-                const { error: profileUpdateError } = await supabase
-                    .from('profiles')
-                    .update({ total_completed_tasks: newTotal })
-                    .eq('id', userId);
+                    if (taskError) throw taskError;
 
-                if (profileUpdateError) throw profileUpdateError;
+                    taskItem.classList.toggle('completed', newStatus === 'completed');
+
+                    // Récupérer l'ID utilisateur depuis le localStorage
+                    let userId = null;
+                    const storedUser = localStorage.getItem('studyquest_user');
+                    if (storedUser) {
+                        userId = JSON.parse(storedUser).id;
+                    }
+
+                    if (userId) {
+                        // Récupérer le total actuel des tâches complétées dans la table 'profiles'
+                        const { data: profileData, error: profileFetchError } = await supabase
+                            .from('profiles')
+                            .select('total_completed_tasks')
+                            .eq('id', userId)
+                            .single();
+
+                        if (!profileFetchError && profileData) {
+                            let currentTotal = profileData.total_completed_tasks || 0;
+                            
+                            // Calculer le nouveau total en fonction du nouveau statut de la tâche
+                            let newTotal = newStatus === 'completed' 
+                                ? currentTotal + 1 
+                                : Math.max(0, currentTotal - 1);
+
+                            // Mettre à jour la table 'profiles' avec le nouveau total
+                            const { error: profileUpdateError } = await supabase
+                                .from('profiles')
+                                .update({ total_completed_tasks: newTotal })
+                                .eq('id', userId);
+
+                            if (profileUpdateError) throw profileUpdateError;
+                        }
+                    }
+
+                    // On compte combien de tâches ont la classe 'completed' sur toute la page
+                    const completedCount = document.querySelectorAll('.task-item.completed').length;
+
+                    const box1 = document.getElementById('mini-box-1');
+                    const box2 = document.getElementById('mini-box-2');
+
+                    // Cocher le 1er carré si au moins 1 tâche est finie
+                    if (box1) {
+                        if (completedCount >= 1) {
+                            box1.classList.add('checked');
+                            box1.innerHTML = '<i class="fa-solid fa-check"></i>';
+                        } else {
+                            box1.classList.remove('checked');
+                            box1.innerHTML = '';
+                        }
+                    }
+
+                    // Cocher le 2ème carré si au moins 2 tâches sont finies
+                    if (box2) {
+                        if (completedCount >= 2) {
+                            box2.classList.add('checked');
+                            box2.innerHTML = '<i class="fa-solid fa-check"></i>';
+                        } else {
+                            box2.classList.remove('checked');
+                            box2.innerHTML = '';
+                        }
+                    }
+
+                    // Rafraîchir l'interface pour afficher les nouvelles stats et le nouveau statut
+                    if (typeof onDataChangeCallback === 'function') onDataChangeCallback();
+
+                } catch (err) {
+                    console.error("Erreur lors de la mise à jour du statut ou du profil :", err.message);
+                }
             }
-        }
 
-        // On compte combien de tâches ont la classe 'completed' sur toute la page
-        const completedCount = document.querySelectorAll('.task-item.completed').length;
-
-        const box1 = document.getElementById('mini-box-1');
-        const box2 = document.getElementById('mini-box-2');
-
-
-        // Cocher le 1er carré si au moins 1 tâche est finie
-        if (box1) {
-            if (completedCount >= 1) {
-                box1.classList.add('checked');
-                box1.innerHTML = '<i class="fa-solid fa-check"></i>';
-            } else {
-                box1.classList.remove('checked');
-                box1.innerHTML = '';
-            }
-        }
-
-        // Cocher le 2ème carré si au moins 2 tâches sont finies
-        if (box2) {
-            if (completedCount >= 2) {
-                box2.classList.add('checked');
-                box2.innerHTML = '<i class="fa-solid fa-check"></i>';
-            } else {
-                box2.classList.remove('checked');
-                box2.innerHTML = '';
-            }
-        }
-
-        //  Rafraîchir l'interface pour afficher les nouvelles stats et le nouveau statut
-        if (typeof onDataChangeCallback === 'function') onDataChangeCallback();
-
-    } catch (err) {
-        console.error("Erreur lors de la mise à jour du statut ou du profil :", err.message);
-    }
-}
             // Supprimer
             if (e.target.closest('.delete-task-btn')) {
                 if (confirm("Supprimer cette tâche ?")) {

@@ -151,7 +151,16 @@ body.app-body {
 /* Conteneur horizontal pour mettre les carrés côte à côte */
 .streak-checkboxes {
     display: flex;
+    flex-direction: row;
     gap: 6px; /* Espace entre les deux carrés */
+}
+
+/* Conteneur des deux mini-cases en disposition horizontale */
+.checkbox-mock {
+    display: flex;
+    flex-direction: row;
+    gap: 6px; /* Espace horizontal entre les deux carrés */
+    align-items: center;
 }
 
 /* Style de base d'un mini carré */
