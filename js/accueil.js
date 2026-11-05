@@ -2,12 +2,10 @@ import { initTasksModule } from './taskManager.js';
 import { loadAccueilData } from './session.js';
 import { startMidnightCountdown } from './countdown.js';
 
-// Lancer le chargement au chargement du DOM si on est sur la page d'accueil
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('username-display')) {
         startMidnightCountdown();
         
-        // Accepte un onglet forcé (ex: après un ajout de tâche), sinon détecte l'onglet actif
         const reloadCurrentTab = (forcedTab = null) => {
             let tabName = forcedTab;
 
@@ -23,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Met à jour visuellement la classe .active sur les boutons d'onglets
             const tabBtns = document.querySelectorAll('.tasks-tabs .tab-btn');
             tabBtns.forEach(btn => {
                 const text = btn.textContent.trim().toLowerCase();
@@ -37,7 +34,21 @@ document.addEventListener('DOMContentLoaded', () => {
             loadAccueilData(tabName);
         };
 
-        reloadCurrentTab();
+        reloadCurrentTab('today');
         initTasksModule(reloadCurrentTab); 
+
+        const tabBtns = document.querySelectorAll('.tasks-tabs .tab-btn');
+        tabBtns.forEach((btn, index) => {
+            if (btn.classList.contains('add-task-btn')) return;
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                if (index === 0) reloadCurrentTab('today');
+                else if (index === 1) reloadCurrentTab('upcoming');
+                else if (index === 2) reloadCurrentTab('flexible');
+                else if (index === 3) reloadCurrentTab('completed');
+            });
+        });
     }
 });
