@@ -155,35 +155,3 @@ export async function loadAccueilData(currentTab = 'today') {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const reloadCurrentTab = () => {
-        const activeBtn = document.querySelector('.tasks-tabs .tab-btn.active');
-        let targetTab = 'today';
-        if (activeBtn) {
-            const text = activeBtn.textContent.trim().toLowerCase();
-            if (text.includes('venir')) targetTab = 'upcoming';
-            else if (text.includes('flexible')) targetTab = 'flexible';
-            else if (text.includes('complété')) targetTab = 'completed';
-        }
-        loadAccueilData(targetTab);
-    };
-
-    loadAccueilData('today');
-
-    import('./taskManager.js').then(({ initTasksModule }) => {
-        initTasksModule(reloadCurrentTab);
-    });
-
-    const tabBtns = document.querySelectorAll('.tasks-tabs .tab-btn');
-    tabBtns.forEach((btn, index) => {
-        if (btn.classList.contains('add-task-btn')) return;
-        btn.addEventListener('click', () => {
-            tabBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if (index === 0) loadAccueilData('today');
-            else if (index === 1) loadAccueilData('upcoming');
-            else if (index === 2) loadAccueilData('flexible');
-            else if (index === 3) loadAccueilData('completed');
-        });
-    });
-});

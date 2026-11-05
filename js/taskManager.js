@@ -7,6 +7,7 @@ export function initTasksModule(onDataChangeCallback) {
     const cancelModalBtn = document.getElementById('cancel-modal-btn');
     const addTaskForm = document.getElementById('add-task-form');
     const tasksContainer = document.getElementById('tasks-container');
+
     
     const modalTitle = modal ? modal.querySelector('h2') : null;
     const submitBtn = addTaskForm ? addTaskForm.querySelector('.btn-primary') : null;
@@ -143,7 +144,18 @@ export function initTasksModule(onDataChangeCallback) {
                 }
 
                 closeModal();
-                if (typeof onDataChangeCallback === 'function') onDataChangeCallback();
+                // On détermine sur quel onglet se placer après l'ajout
+                let targetTab = 'today';
+                if (selectedTaskType === 'flexible') {
+                    targetTab = 'flexible';
+                } else if (dueDate) {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    if (dueDate > todayStr) targetTab = 'upcoming';
+                }
+
+                if (typeof onDataChangeCallback === 'function') {
+                    onDataChangeCallback(targetTab);
+                }
 
             } catch (err) {
                 console.error("Erreur lors de l'enregistrement :", err.message);
