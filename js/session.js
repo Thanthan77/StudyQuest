@@ -75,8 +75,6 @@ export async function loadAccueilData(currentTab = 'today') {
             return completedDateOnly === today;
         }) : [];
 
-        console.log("Tâches complétées aujourd'hui :", completedCountToday);
-        console.log("Toutes les tâches 'completed' récupérées de Supabase :", allCompletedTasks);
 
         const tasksProgress = document.getElementById('tasks-progress-display');
         if (tasksProgress) tasksProgress.textContent = `${completedCountToday.length}/2 tâches validées aujourd'hui`;
