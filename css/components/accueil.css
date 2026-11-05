@@ -247,12 +247,29 @@ body.app-body {
     display: flex; 
     align-items: center; 
     justify-content: center; 
+    cursor: pointer;
+    position: relative;
+    background-color: #fff;
+    transition: all 0.2s ease;
 }
-.task-item.completed .task-check { 
-    background-color: #10b981;
-    border-color: #10b981;
-    color: white; 
+
+/* Cache la vraie case moche tout en la laissant cliquable sur toute la surface */
+.task-check input[type="checkbox"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
 }
+
+/* Style quand la tâche est complétée (le conteneur change de couleur/fond) */
+.task-item.completed .task-check {
+    background-color: #6366f1; /* Couleur de validation (ex: violet/bleu StudyQuest) */
+    border-color: #6366f1;
+    color: #fff;
+}
+
 .task-item.completed .task-name { 
     text-decoration: line-through; 
     color: #6b7280; 

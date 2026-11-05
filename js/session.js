@@ -1,6 +1,5 @@
 import { supabase } from './supabaseClient.js';
 
-// Fonction pour obtenir la date du jour au format YYYY-MM-DD
 function getTodayDate() {
     const d = new Date();
     const year = d.getFullYear();
@@ -10,7 +9,6 @@ function getTodayDate() {
 }
 
 export async function loadAccueilData(currentTab = 'today') {
-    // Récupérer l'utilisateur connecté depuis le localStorage
     const storedUser = localStorage.getItem('studyquest_user');
     if (!storedUser) {
         window.location.href = '../index.html';
@@ -18,26 +16,19 @@ export async function loadAccueilData(currentTab = 'today') {
     }
     const localUser = JSON.parse(storedUser);
 
-    // Affichage du pseudo 
     const usernameDisplay = document.getElementById('username-display');
-    if (usernameDisplay) {
-        usernameDisplay.textContent = localUser.username;
-    }
+    if (usernameDisplay) usernameDisplay.textContent = localUser.username;
 
     const today = getTodayDate();
 
     try {
-        // Charger les données du profil depuis Supabase
-        let { data: profile, error: profileError } = await supabase
+        let { data: profile } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', localUser.id)
             .single();
 
-        if (profileError) throw profileError;
-
         if (profile) {
-            // Carte Série
             const streakCount = document.getElementById('streak-count-display');
             if (streakCount) streakCount.textContent = profile.current_streak ?? 0;
 
@@ -51,75 +42,53 @@ export async function loadAccueilData(currentTab = 'today') {
             if (currentStreak) currentStreak.textContent = `${profile.current_streak ?? 0} jours`;
         }
 
-        // Affichage des compteurs de tâches dans les onglets
         const tabSpans = document.querySelectorAll('.tasks-tabs .tab-btn span');
 
-        // Compteur "Aujourd'hui" (tâches du jour non complétées)
-        const { count: todayCount } = await supabase
-            .from('tasks')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', localUser.id)
-            .eq('task_type', 'dated')
-            .eq('due_date', today)
-            .eq('status', 'pending');
+        const { count: todayCount } = await supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('task_type', 'dated').eq('due_date', today).eq('status', 'pending');
         if (tabSpans[0]) tabSpans[0].textContent = todayCount || 0;
 
-        // Compteur "À venir" (tâches futures non complétées)
-        const { count: upcomingCount } = await supabase
-            .from('tasks')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', localUser.id)
-            .eq('task_type', 'dated')
-            .gt('due_date', today)
-            .eq('status', 'pending');
+        const { count: upcomingCount } = await supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('task_type', 'dated').gt('due_date', today).eq('status', 'pending');
         if (tabSpans[1]) tabSpans[1].textContent = upcomingCount || 0;
 
-        // Compteur "Flexibles" (tâches flexibles non complétées)
-        const { count: flexibleCount } = await supabase
-            .from('tasks')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', localUser.id)
-            .eq('task_type', 'flexible')
-            .eq('status', 'pending');
+        const { count: flexibleCount } = await supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('task_type', 'flexible').eq('status', 'pending');
         if (tabSpans[2]) tabSpans[2].textContent = flexibleCount || 0;
 
-        //  Compteur "Complétées" (toutes les tâches terminées)
-        const { count: completedCountBadge } = await supabase
-            .from('tasks')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', localUser.id)
-            .eq('status', 'completed');
+        const { count: completedCountBadge } = await supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('status', 'completed');
         if (tabSpans[3]) tabSpans[3].textContent = completedCountBadge || 0;
 
-
-        // Persistance du nombre de tâches complétées aujourd'hui pour l'affichage des mini-cases
-        const { data: completedTodayTasks } = await supabase
+        let { data: allCompletedTasks } = await supabase
             .from('tasks')
             .select('*')
             .eq('user_id', localUser.id)
-            .eq('status', 'completed')
-            .gte('completed_at', `${today}T00:00:00`)
-            .lte('completed_at', `${today}T23:59:59`);
+            .eq('status', 'completed');
 
-        const completedCountToday = completedTodayTasks ? completedTodayTasks.length : 0;
+        const completedCountToday = allCompletedTasks ? allCompletedTasks.filter(task => {
+            if (!task.completed_at) return false;
 
-        // Mettre à jour le texte de progression de la journée
+            // On convertit le timestamp UTC de Supabase en date locale de ton navigateur
+            const taskDate = new Date(task.completed_at);
+            const year = taskDate.getFullYear();
+            const month = String(taskDate.getMonth() + 1).padStart(2, '0');
+            const day = String(taskDate.getDate()).padStart(2, '0');
+            const completedDateOnly = `${year}-${month}-${day}`;
+
+            return completedDateOnly === today;
+        }) : [];
+
+        console.log("Tâches complétées aujourd'hui :", completedCountToday);
+        console.log("Toutes les tâches 'completed' récupérées de Supabase :", allCompletedTasks);
+
         const tasksProgress = document.getElementById('tasks-progress-display');
-        if (tasksProgress) {
-            tasksProgress.textContent = `${completedCountToday}/2 tâches validées aujourd'hui`;
-        }
+        if (tasksProgress) tasksProgress.textContent = `${completedCountToday.length}/2 tâches validées aujourd'hui`;
 
         const totalTasksStat = document.getElementById('total-tasks-stat');
-        if (totalTasksStat) {
-            totalTasksStat.textContent = completedCountToday;
-        }
+        if (totalTasksStat) totalTasksStat.textContent = profile?.total_completed_tasks ?? completedCountToday.length;
 
-        // Restaurer l'état visuel des mini-cases au rechargement
         const box1 = document.getElementById('mini-box-1');
         const box2 = document.getElementById('mini-box-2');
 
         if (box1) {
-            if (completedCountToday >= 1) {
+            if (completedCountToday.length >= 1) {
                 box1.classList.add('checked');
                 box1.innerHTML = '<i class="fa-solid fa-check"></i>';
             } else {
@@ -129,7 +98,7 @@ export async function loadAccueilData(currentTab = 'today') {
         }
 
         if (box2) {
-            if (completedCountToday >= 2) {
+            if (completedCountToday.length >= 2) {
                 box2.classList.add('checked');
                 box2.innerHTML = '<i class="fa-solid fa-check"></i>';
             } else {
@@ -138,53 +107,41 @@ export async function loadAccueilData(currentTab = 'today') {
             }
         }
 
-
-        // Charger les tâches de l'utilisateur depuis Supabase en fonction de l'onglet sélectionné
-        let query = supabase
-            .from('tasks')
-            .select('*')
-            .eq('user_id', localUser.id);
+        let query = supabase.from('tasks').select('*').eq('user_id', localUser.id);
 
         if (currentTab === 'today') {
-            query = query.eq('task_type', 'dated').eq('due_date', today).eq('status', 'pending').limit(10);
+            query = query.eq('task_type', 'dated').eq('due_date', today).eq('status', 'pending');
         } else if (currentTab === 'upcoming') {
-            query = query.eq('task_type', 'dated').gt('due_date', today).eq('status', 'pending').order('due_date', { ascending: true }).limit(10);
+            query = query.eq('task_type', 'dated').gt('due_date', today).eq('status', 'pending').order('due_date', { ascending: true });
         } else if (currentTab === 'flexible') {
-            query = query.eq('task_type', 'flexible').eq('status', 'pending').limit(10);
+            query = query.eq('task_type', 'flexible').eq('status', 'pending');
         } else if (currentTab === 'completed') {
-            query = query.eq('status', 'completed').order('completed_at', { ascending: false }).limit(10);
+            query = query.eq('status', 'completed').order('completed_at', { ascending: false });
         }
 
-        let { data: tasks, error: tasksError } = await query;
+        let { data: tasks } = await query;
         const tasksContainer = document.getElementById('tasks-container');
 
         if (tasksContainer) {
-            if (tasksError || !tasks || tasks.length === 0) {
+            if (!tasks || tasks.length === 0) {
                 let emptyMessage = "Vous n'avez pas de tâches aujourd'hui";
                 if (currentTab === 'upcoming') emptyMessage = "Aucune tâche à venir";
                 if (currentTab === 'flexible') emptyMessage = "Aucune tâche flexible";
                 if (currentTab === 'completed') emptyMessage = "Aucune tâche complétée pour l'instant";
 
-                tasksContainer.innerHTML = `
-                    <div class="empty-state-tasks">
-                        ${emptyMessage}
-                    </div>
-                `;
+                tasksContainer.innerHTML = `<div class="empty-state-tasks">${emptyMessage}</div>`;
             } else {
                 tasksContainer.innerHTML = tasks.map(task => {
                     const isCompleted = task.status === 'completed';
                     const isSchool = task.category === 'school';
-                    const tagName = isSchool ? 'École' : 'Perso';
-                    const tagClass = isSchool ? 'school' : 'perso';
-
                     return `
                         <div class="task-item ${isCompleted ? 'completed' : ''}" data-id="${task.id}">
-                            <div class="task-check">
-                                ${isCompleted ? '<i class="fa-solid fa-check"></i>' : ''}
-                            </div>
+                            <label class="task-check" style="cursor: pointer;">
+                                <input type="checkbox" class="native-task-checkbox" ${isCompleted ? 'checked' : ''} style="cursor: pointer;">
+                            </label>
                             <span class="task-name">${task.title}</span>
                             ${task.due_date ? `<span class="task-date"><i class="fa-regular fa-calendar"></i> ${task.due_date}</span>` : ''}
-                            <span class="task-tag ${tagClass}">${tagName}</span>
+                            <span class="task-tag ${isSchool ? 'school' : 'perso'}">${isSchool ? 'École' : 'Perso'}</span>
                             <div class="task-actions">
                                 <i class="fa-solid fa-pen edit-task-btn"></i> 
                                 <i class="fa-solid fa-trash delete-task-btn"></i>
@@ -193,70 +150,40 @@ export async function loadAccueilData(currentTab = 'today') {
                 }).join('');
             }
         }
-
-        // Charge les groupes de l'utilisateur depuis Supabase
-        let { data: groups, error: groupsError } = await supabase
-            .from('group_members')
-            .select('groups(*)')
-            .eq('user_id', localUser.id);
-
-        const groupsContainer = document.getElementById('groups-container');
-        const groupsCountBadge = document.getElementById('groups-count-badge');
-
-        if (groupsContainer) {
-            if (groupsError || !groups || groups.length === 0) {
-                if (groupsCountBadge) groupsCountBadge.textContent = "0";
-                groupsContainer.innerHTML = `
-                    <div class="empty-state-groups">
-                        Vous n'avez pas de groupes
-                    </div>
-                `;
-            } else {
-                if (groupsCountBadge) groupsCountBadge.textContent = groups.length;
-                groupsContainer.innerHTML = groups.map(item => {
-                    const group = item.groups;
-                    return `
-                        <div class="group-item">
-                            <span class="group-badge-rank rank-other">${group.rank || '2e'}</span>
-                            <div class="group-info">
-                                <strong>${group.name}</strong>
-                                <small>${group.members_count || '1'} / 10 membres</small>
-                            </div>
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </div>
-                    `;
-                }).join('');
-            }
-        }
-
     } catch (err) {
-        console.error("Erreur lors du chargement des données de la page d'accueil :", err.message);
+        console.error("Erreur de chargement :", err.message);
     }
 }
 
-// Gestion des onglets de tâches
 document.addEventListener('DOMContentLoaded', () => {
-    // Charger par défaut l'onglet "Aujourd'hui"
+    const reloadCurrentTab = () => {
+        const activeBtn = document.querySelector('.tasks-tabs .tab-btn.active');
+        let targetTab = 'today';
+        if (activeBtn) {
+            const text = activeBtn.textContent.trim().toLowerCase();
+            if (text.includes('venir')) targetTab = 'upcoming';
+            else if (text.includes('flexible')) targetTab = 'flexible';
+            else if (text.includes('complété')) targetTab = 'completed';
+        }
+        loadAccueilData(targetTab);
+    };
+
     loadAccueilData('today');
+
+    import('./taskManager.js').then(({ initTasksModule }) => {
+        initTasksModule(reloadCurrentTab);
+    });
 
     const tabBtns = document.querySelectorAll('.tasks-tabs .tab-btn');
     tabBtns.forEach((btn, index) => {
-        // On ignore le bouton d'ajout (.add-task-btn s'il est inclus dans le querySelectorAll)
         if (btn.classList.contains('add-task-btn')) return;
-
         btn.addEventListener('click', () => {
             tabBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
-            if (index === 0) {
-                loadAccueilData('today');
-            } else if (index === 1) {
-                loadAccueilData('upcoming');
-            } else if (index === 2) {
-                loadAccueilData('flexible');
-            } else if (index === 3) {
-                loadAccueilData('completed');
-            }
+            if (index === 0) loadAccueilData('today');
+            else if (index === 1) loadAccueilData('upcoming');
+            else if (index === 2) loadAccueilData('flexible');
+            else if (index === 3) loadAccueilData('completed');
         });
     });
 });
