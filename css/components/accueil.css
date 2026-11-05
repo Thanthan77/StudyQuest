@@ -262,6 +262,11 @@ body.app-body {
     font-weight: 500; 
     font-size: 0.95rem; 
 }
+.task-date{
+    margin-left: 8px; 
+    font-size: 0.85rem; 
+    color: #6b7280;
+}
 .task-tag { 
     font-size: 0.75rem; 
     padding: 3px 8px; 
@@ -577,6 +582,23 @@ body.app-body {
 .btn-secondary:hover {
     background-color: #27272a;
 }
+
+.empty-state-groups{
+    padding: 20px; 
+    text-align: center; 
+    color: #9ca3af; 
+    font-size: 0.9rem; 
+    margin-bottom: 10px;
+}
+
+.empty-state-tasks{
+    padding: 30px; 
+    text-align: center; 
+    color: #9ca3af; 
+    font-size: 0.95rem;
+}
+
+
 
 /* Ajustement automatique pour les écrans PC portables ou écrans larges */
 @media (min-width: 769px) {

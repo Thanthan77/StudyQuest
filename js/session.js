@@ -83,7 +83,7 @@ export async function loadAccueilData(currentTab = 'today') {
             .eq('status', 'pending');
         if (tabSpans[2]) tabSpans[2].textContent = flexibleCount || 0;
 
-        // 4. Compteur "Complétées" (toutes les tâches terminées)
+        //  Compteur "Complétées" (toutes les tâches terminées)
         const { count: completedCountBadge } = await supabase
             .from('tasks')
             .select('*', { count: 'exact', head: true })
@@ -146,13 +146,13 @@ export async function loadAccueilData(currentTab = 'today') {
             .eq('user_id', localUser.id);
 
         if (currentTab === 'today') {
-            query = query.eq('task_type', 'dated').eq('due_date', today).eq('status', 'pending');
+            query = query.eq('task_type', 'dated').eq('due_date', today).eq('status', 'pending').limit(10);
         } else if (currentTab === 'upcoming') {
             query = query.eq('task_type', 'dated').gt('due_date', today).eq('status', 'pending').order('due_date', { ascending: true }).limit(10);
         } else if (currentTab === 'flexible') {
             query = query.eq('task_type', 'flexible').eq('status', 'pending').limit(10);
         } else if (currentTab === 'completed') {
-            query = query.eq('status', 'completed').order('completed_at', { ascending: false }).limit(20);
+            query = query.eq('status', 'completed').order('completed_at', { ascending: false }).limit(10);
         }
 
         let { data: tasks, error: tasksError } = await query;
@@ -166,7 +166,7 @@ export async function loadAccueilData(currentTab = 'today') {
                 if (currentTab === 'completed') emptyMessage = "Aucune tâche complétée pour l'instant";
 
                 tasksContainer.innerHTML = `
-                    <div style="padding: 30px; text-align: center; color: #9ca3af; font-size: 0.95rem;">
+                    <div class="empty-state-tasks">
                         ${emptyMessage}
                     </div>
                 `;
@@ -183,7 +183,7 @@ export async function loadAccueilData(currentTab = 'today') {
                                 ${isCompleted ? '<i class="fa-solid fa-check"></i>' : ''}
                             </div>
                             <span class="task-name">${task.title}</span>
-                            ${task.due_date ? `<span class="task-date" style="margin-left: 8px; font-size: 0.85rem; color: #6b7280;"><i class="fa-regular fa-calendar"></i> ${task.due_date}</span>` : ''}
+                            ${task.due_date ? `<span class="task-date"><i class="fa-regular fa-calendar"></i> ${task.due_date}</span>` : ''}
                             <span class="task-tag ${tagClass}">${tagName}</span>
                             <div class="task-actions">
                                 <i class="fa-solid fa-pen edit-task-btn"></i> 
@@ -207,7 +207,7 @@ export async function loadAccueilData(currentTab = 'today') {
             if (groupsError || !groups || groups.length === 0) {
                 if (groupsCountBadge) groupsCountBadge.textContent = "0";
                 groupsContainer.innerHTML = `
-                    <div style="padding: 20px; text-align: center; color: #9ca3af; font-size: 0.9rem; margin-bottom: 10px;">
+                    <div class="empty-state-groups">
                         Vous n'avez pas de groupes
                     </div>
                 `;
@@ -234,9 +234,7 @@ export async function loadAccueilData(currentTab = 'today') {
     }
 }
 
-// ==========================================
-// GESTION DES CLICS SUR LES ONGLETS DE TÂCHES
-// ==========================================
+// Gestion des onglets de tâches
 document.addEventListener('DOMContentLoaded', () => {
     // Charger par défaut l'onglet "Aujourd'hui"
     loadAccueilData('today');
