@@ -149,8 +149,13 @@ export function initTasksModule(onDataChangeCallback) {
                 if (selectedTaskType === 'flexible') {
                     targetTab = 'flexible';
                 } else if (dueDate) {
-                    const todayStr = new Date().toISOString().split('T')[0];
-                    if (dueDate > todayStr) targetTab = 'upcoming';
+                    const todayStr = getTodayDate();
+                    if (dueDate > todayStr) {
+                        targetTab = 'upcoming';
+                    }else{
+                        targetTab = 'today';
+                    }
+
                 }
 
                 if (typeof onDataChangeCallback === 'function') {
