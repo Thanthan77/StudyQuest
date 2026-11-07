@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient.js';
+import { getTodayDate } from './utils.js';
 
 export function initTasksModule(onDataChangeCallback) {
     const modal = document.getElementById('task-modal');
@@ -8,10 +9,8 @@ export function initTasksModule(onDataChangeCallback) {
     const addTaskForm = document.getElementById('add-task-form');
     const tasksContainer = document.getElementById('tasks-container');
 
-    
     const modalTitle = modal ? modal.querySelector('h2') : null;
     const submitBtn = addTaskForm ? addTaskForm.querySelector('.btn-primary') : null;
-    
     const titleInput = document.getElementById('task-title-input');
     const dateInput = document.getElementById('task-date-input');
     const dateContainer = document.getElementById('date-container');
@@ -19,18 +18,9 @@ export function initTasksModule(onDataChangeCallback) {
     let editingTaskId = null;
     let selectedTaskType = 'dated'; 
     let selectedCategory = 'school'; 
-    
-    // Verrou anti-double-clic pour empêcher les incrémentation en double
     let isUpdating = false;
 
-    function getTodayDate() {
-        const d = new Date();
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-
+    // --- GESTION DE LA MODALE ---
     if (openModalBtn) {
         openModalBtn.addEventListener('click', () => {
             editingTaskId = null;
@@ -57,31 +47,26 @@ export function initTasksModule(onDataChangeCallback) {
         selectedTaskType = type;
         selectedCategory = category;
 
-        const toggleBtns = document.querySelectorAll('.toggle-btn');
-        toggleBtns.forEach(b => {
+        document.querySelectorAll('.toggle-btn').forEach(b => {
             const when = b.getAttribute('data-when');
             const targetWhen = (type === 'dated' ? 'specific' : 'flexible');
-            if (when === targetWhen) b.classList.add('active');
-            else b.classList.remove('active');
+            b.classList.toggle('active', when === targetWhen);
         });
 
         if (dateContainer) {
             dateContainer.style.display = (type === 'flexible') ? 'none' : 'block';
         }
 
-        const categoryBtns = document.querySelectorAll('.category-btn');
-        categoryBtns.forEach(b => {
+        document.querySelectorAll('.category-btn').forEach(b => {
             const catAttr = b.getAttribute('data-category');
             const targetCat = (category === 'personal' ? 'perso' : 'school');
-            if (catAttr === targetCat) b.classList.add('active');
-            else b.classList.remove('active');
+            b.classList.toggle('active', catAttr === targetCat);
         });
     }
 
-    const toggleBtns = document.querySelectorAll('.toggle-btn');
-    toggleBtns.forEach(btn => {
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            toggleBtns.forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             const when = btn.getAttribute('data-when');
             selectedTaskType = (when === 'specific') ? 'dated' : 'flexible';
@@ -91,71 +76,57 @@ export function initTasksModule(onDataChangeCallback) {
         });
     });
 
-    const categoryBtns = document.querySelectorAll('.category-btn');
-    categoryBtns.forEach(btn => {
+    document.querySelectorAll('.category-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            categoryBtns.forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             const cat = btn.getAttribute('data-category');
             selectedCategory = (cat === 'perso') ? 'personal' : 'school';
         });
     });
 
+    // --- SOUMISSION DU FORMULAIRE ---
     if (addTaskForm) {
         addTaskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            let userId = null;
             const storedUser = localStorage.getItem('studyquest_user');
-            if (storedUser) userId = JSON.parse(storedUser).id;
-
-            if (!userId) {
+            if (!storedUser) {
                 alert("Erreur : Aucun utilisateur connecté.");
                 return;
             }
-
+            const userId = JSON.parse(storedUser).id;
             const taskTitle = titleInput ? titleInput.value.trim() : '';
             const dueDate = selectedTaskType === 'dated' && dateInput ? dateInput.value : null;
 
             try {
                 if (editingTaskId) {
-                    const { error } = await supabase
-                        .from('tasks')
-                        .update({
-                            title: taskTitle,
-                            task_type: selectedTaskType,
-                            due_date: dueDate || null,
-                            category: selectedCategory
-                        })
-                        .eq('id', editingTaskId);
+                    const { error } = await supabase.from('tasks').update({
+                        title: taskTitle,
+                        task_type: selectedTaskType,
+                        due_date: dueDate || null,
+                        category: selectedCategory
+                    }).eq('id', editingTaskId);
                     if (error) throw error;
                 } else {
-                    const { error } = await supabase
-                        .from('tasks')
-                        .insert([{
-                            user_id: userId,
-                            title: taskTitle,
-                            task_type: selectedTaskType,
-                            due_date: dueDate || null,
-                            status: 'pending',
-                            category: selectedCategory
-                        }]);
+                    const { error } = await supabase.from('tasks').insert([{
+                        user_id: userId,
+                        title: taskTitle,
+                        task_type: selectedTaskType,
+                        due_date: dueDate || null,
+                        status: 'pending',
+                        category: selectedCategory
+                    }]);
                     if (error) throw error;
                 }
 
                 closeModal();
-                // On détermine sur quel onglet se placer après l'ajout
+
                 let targetTab = 'today';
                 if (selectedTaskType === 'flexible') {
                     targetTab = 'flexible';
-                } else if (dueDate) {
-                    const todayStr = getTodayDate();
-                    if (dueDate > todayStr) {
-                        targetTab = 'upcoming';
-                    }else{
-                        targetTab = 'today';
-                    }
-
+                } else if (dueDate && dueDate > getTodayDate()) {
+                    targetTab = 'upcoming';
                 }
 
                 if (typeof onDataChangeCallback === 'function') {
@@ -163,12 +134,13 @@ export function initTasksModule(onDataChangeCallback) {
                 }
 
             } catch (err) {
-                console.error("Erreur lors de l'enregistrement :", err.message);
+                console.error("Erreur lors de l'enregistrement de la tâche :", err.message);
                 alert("Erreur : " + err.message);
             }
         });
     }
 
+    // --- ACTIONS SUR LES TÂCHES ---
     if (tasksContainer) {
         tasksContainer.addEventListener('click', async (e) => {
             const taskItem = e.target.closest('.task-item');
@@ -176,7 +148,7 @@ export function initTasksModule(onDataChangeCallback) {
             
             const taskId = taskItem.getAttribute('data-id');
 
-            // Terminer / Cocher via la case native
+            // 1. Case à cocher (Compléter / Décocher)
             const checkbox = e.target.closest('.native-task-checkbox');
             if (checkbox) {
                 if (isUpdating) return;
@@ -184,13 +156,11 @@ export function initTasksModule(onDataChangeCallback) {
 
                 const isCompleted = checkbox.checked;
                 const newStatus = isCompleted ? 'completed' : 'pending';
-                
                 taskItem.classList.toggle('completed', isCompleted);
                 
                 try {
                     const completedAtValue = isCompleted ? new Date().toISOString() : null;
 
-                    // 1. Mettre à jour le statut de la tâche
                     const { error: taskError } = await supabase
                         .from('tasks')
                         .update({ 
@@ -201,12 +171,10 @@ export function initTasksModule(onDataChangeCallback) {
 
                     if (taskError) throw taskError;
 
-                    // 2. Mettre à jour le profil (total_completed_tasks) en une seule opération sécurisée
-                    let userId = null;
+                    // Mise à jour du compteur total de tâches complétées dans le profil
                     const storedUser = localStorage.getItem('studyquest_user');
-                    if (storedUser) userId = JSON.parse(storedUser).id;
-
-                    if (userId) {
+                    if (storedUser) {
+                        const userId = JSON.parse(storedUser).id;
                         const { data: profileData } = await supabase
                             .from('profiles')
                             .select('total_completed_tasks')
@@ -215,7 +183,6 @@ export function initTasksModule(onDataChangeCallback) {
 
                         if (profileData) {
                             let currentTotal = profileData.total_completed_tasks || 0;
-                            // On sécurise pour ne pas dépasser ou descendre sous 0
                             let newTotal = isCompleted ? currentTotal + 1 : Math.max(0, currentTotal - 1);
 
                             await supabase
@@ -230,18 +197,15 @@ export function initTasksModule(onDataChangeCallback) {
                     }
 
                 } catch (err) {
-                    console.error("Erreur mise à jour statut :", err.message);
+                    console.error("Erreur lors de la mise à jour du statut :", err.message);
                     checkbox.checked = !isCompleted;
                     taskItem.classList.toggle('completed', !isCompleted);
                 } finally {
-                    // On laisse un léger délai avant de libérer le verrou pour absorber les double-clics du navigateur
-                    setTimeout(() => {
-                        isUpdating = false;
-                    }, 300);
+                    setTimeout(() => { isUpdating = false; }, 300);
                 }
             }
 
-            // Supprimer
+            // 2. Supprimer
             if (e.target.closest('.delete-task-btn')) {
                 if (confirm("Supprimer cette tâche ?")) {
                     try {
@@ -249,12 +213,12 @@ export function initTasksModule(onDataChangeCallback) {
                         if (error) throw error;
                         if (typeof onDataChangeCallback === 'function') onDataChangeCallback();
                     } catch (err) {
-                        console.error("Erreur suppression :", err.message);
+                        console.error("Erreur lors de la suppression :", err.message);
                     }
                 }
             }
 
-            // Modifier 
+            // 3. Modifier
             if (e.target.closest('.edit-task-btn')) {
                 try {
                     const { data: taskData, error } = await supabase.from('tasks').select('*').eq('id', taskId).single();
@@ -271,7 +235,7 @@ export function initTasksModule(onDataChangeCallback) {
                     resetFormUI(taskData.task_type || 'dated', taskData.category || 'school');
                     if (modal) modal.style.display = 'flex';
                 } catch (err) {
-                    console.error("Erreur modification :", err.message);
+                    console.error("Erreur lors de la modification :", err.message);
                 }
             }
         });

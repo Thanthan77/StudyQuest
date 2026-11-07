@@ -6,32 +6,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('username-display')) {
         startMidnightCountdown();
         
-        const reloadCurrentTab = (forcedTab = null) => {
-            let tabName = forcedTab;
+        // On mémorise l'onglet actif globalement ici
+        let currentActiveTab = 'today';
 
-            if (!tabName) {
-                const activeBtn = document.querySelector('.tasks-tabs .tab-btn.active');
-                tabName = 'today';
-                
-                if (activeBtn) {
-                    const text = activeBtn.textContent.trim().toLowerCase();
-                    if (text.includes('venir')) tabName = 'upcoming';
-                    else if (text.includes('flexible')) tabName = 'flexible';
-                    else if (text.includes('complété')) tabName = 'completed';
-                }
+        const reloadCurrentTab = (forcedTab = null) => {
+            if (forcedTab) {
+                currentActiveTab = forcedTab;
             }
 
             const tabBtns = document.querySelectorAll('.tasks-tabs .tab-btn');
             tabBtns.forEach(btn => {
                 const text = btn.textContent.trim().toLowerCase();
                 btn.classList.remove('active');
-                if (tabName === 'today' && text.includes("aujourd'hui")) btn.classList.add('active');
-                if (tabName === 'upcoming' && text.includes("venir")) btn.classList.add('active');
-                if (tabName === 'flexible' && text.includes("flexible")) btn.classList.add('active');
-                if (tabName === 'completed' && text.includes("complété")) btn.classList.add('active');
+                if (currentActiveTab === 'today' && text.includes("aujourd'hui")) btn.classList.add('active');
+                if (currentActiveTab === 'upcoming' && text.includes("venir")) btn.classList.add('active');
+                if (currentActiveTab === 'flexible' && text.includes("flexible")) btn.classList.add('active');
+                if (currentActiveTab === 'completed' && text.includes("complété")) btn.classList.add('active');
             });
 
-            loadAccueilData(tabName);
+            loadAccueilData(currentActiveTab);
         };
 
         reloadCurrentTab('today');
