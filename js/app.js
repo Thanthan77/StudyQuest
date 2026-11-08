@@ -46,12 +46,14 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
             const diffDays = Math.round((currentDate - lastDate) / (1000 * 60 * 60 * 24));
 
             if (diffDays === 1) {
-                // On laisse l'utilisateur tranquille toute la journée pour qu'il atteigne son objectif.
-                // Le streak d'hier est préservé. S'il atteint son objectif aujourd'hui, on incrémentera.
+                // Le lendemain : on laisse l'utilisateur tranquille pour atteindre son objectif aujourd'hui.
             } else if (diffDays > 1) {
-                // Si plus d'un jour s'est écoulé sans valider (et pas de freeze)
+                // Plusieurs jours manqués : on consomme un gel si disponible, sinon on reset à 0
                 if (freezesCount > 0) {
                     freezesCount -= 1;
+                    //  Le gel protège la streak, on met donc à jour la date de référence 
+                    // pour que le gel ne soit consommé qu'une seule fois pour cette absence.
+                    lastStreakDate = today; 
                 } else {
                     currentStreak = 0;
                 }
