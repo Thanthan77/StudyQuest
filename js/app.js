@@ -22,44 +22,34 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
 
         // Si on est le même jour que le dernier streak enregistré
         if (lastStreakDate === today) {
-            // Si l'objectif n'est plus atteint (ex: l'utilisateur a décoché des tâches)
             if (!goalReachedToday) {
+                // Si l'utilisateur décoche et passe sous l'objectif aujourd'hui
                 currentStreak = Math.max(0, currentStreak - 1);
-                lastStreakDate = null; // On enlève la date du jour validé
-            }
-            // Si l'objectif est atteint et qu'on était à 0
-            else if (goalReachedToday && currentStreak === 0) {
+                lastStreakDate = null; 
+            } else if (goalReachedToday && currentStreak === 0) {
                 currentStreak = 1;
-            }
-            // Si tout est déjà OK pour aujourd'hui, on ne fait rien de plus
-            else {
-                return;
+            } else {
+                return; 
             }
         } 
-        //Premier Streak : si lastStreakDate est null, on initialise le streak à 1 si l'objectif est atteint
+        // Premier Streak : si jamais validé auparavant
         else if (!lastStreakDate) {
             currentStreak = goalReachedToday ? 1 : 0;
             if (goalReachedToday) {
                 lastStreakDate = today;
             }
         } 
-        // Si on est un jour après le dernier streak enregistré
+        // Si on est un ou plusieurs jours après le dernier streak enregistré
         else {
             const lastDate = new Date(lastStreakDate);
             const currentDate = new Date(today);
             const diffDays = Math.round((currentDate - lastDate) / (1000 * 60 * 60 * 24));
 
             if (diffDays === 1) {
-                if (goalReachedToday) {
-                    currentStreak += 1;
-                } else {
-                    if (freezesCount > 0) {
-                        freezesCount -= 1;
-                    } else {
-                        currentStreak = 0;
-                    }
-                }
+                // On laisse l'utilisateur tranquille toute la journée pour qu'il atteigne son objectif.
+                // Le streak d'hier est préservé. S'il atteint son objectif aujourd'hui, on incrémentera.
             } else if (diffDays > 1) {
+                // Si plus d'un jour s'est écoulé sans valider (et pas de freeze)
                 if (freezesCount > 0) {
                     freezesCount -= 1;
                 } else {
@@ -67,9 +57,14 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
                 }
             }
 
+            // Si l'objectif du jour est atteint, on valide la journée d'aujourd'hui
             if (goalReachedToday) {
                 lastStreakDate = today;
-                if (currentStreak === 0) currentStreak = 1;
+                if (diffDays === 1) {
+                    currentStreak += 1; // Incrémente car on est le lendemain et l'objectif est atteint
+                } else if (currentStreak === 0) {
+                    currentStreak = 1;
+                }
             }
         }
 
