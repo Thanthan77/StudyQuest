@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentActiveTab === 'upcoming' && text.includes("venir")) btn.classList.add('active');
                 if (currentActiveTab === 'flexible' && text.includes("flexible")) btn.classList.add('active');
                 if (currentActiveTab === 'completed' && text.includes("complété")) btn.classList.add('active');
+                if (currentActiveTab === 'overdue' && text.includes("en retard")) btn.classList.add('active');
             });
 
             loadAccueilData(currentActiveTab);
@@ -38,9 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.classList.add('active');
                 
                 if (index === 0) reloadCurrentTab('today');
-                else if (index === 1) reloadCurrentTab('upcoming');
-                else if (index === 2) reloadCurrentTab('flexible');
-                else if (index === 3) reloadCurrentTab('completed');
+                 else if (index === 1) reloadCurrentTab('overdue');
+                else if (index === 2) reloadCurrentTab('upcoming');
+                else if (index === 3) reloadCurrentTab('flexible');
+                else if (index === 4) reloadCurrentTab('completed');
             });
         });
     }

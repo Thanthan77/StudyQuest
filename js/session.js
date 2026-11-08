@@ -16,10 +16,11 @@ export async function loadAccueilData(currentTab = 'today') {
     const today = getTodayDate();
 
     try {
-        // 🚀 PROMISE.ALL : On lance toutes les lectures Supabase en même temps pour zéro latence
+        // Promise.all : On lance toutes les lectures Supabase en même temps pour zéro latence
         const [
             profileRes,
             todayCountRes,
+            overdueCountRes,
             upcomingCountRes,
             flexibleCountRes,
             completedBadgeRes,
@@ -28,6 +29,7 @@ export async function loadAccueilData(currentTab = 'today') {
         ] = await Promise.all([
             supabase.from('profiles').select('*').eq('id', localUser.id).single(),
             supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('task_type', 'dated').eq('due_date', today).eq('status', 'pending'),
+            supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('task_type', 'dated').lt('due_date', today).eq('status', 'pending'), // 👈 Corrigé ici (.lt au lieu de .gt)
             supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('task_type', 'dated').gt('due_date', today).eq('status', 'pending'),
             supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('task_type', 'flexible').eq('status', 'pending'),
             supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('status', 'completed'),
@@ -40,9 +42,10 @@ export async function loadAccueilData(currentTab = 'today') {
 
         const tabSpans = document.querySelectorAll('.tasks-tabs .tab-btn span');
         if (tabSpans[0]) tabSpans[0].textContent = todayCountRes.count || 0;
-        if (tabSpans[1]) tabSpans[1].textContent = upcomingCountRes.count || 0;
-        if (tabSpans[2]) tabSpans[2].textContent = flexibleCountRes.count || 0;
-        if (tabSpans[3]) tabSpans[3].textContent = completedBadgeRes.count || 0;
+        if (tabSpans[1]) tabSpans[1].textContent = overdueCountRes.count || 0;
+        if (tabSpans[2]) tabSpans[2].textContent = upcomingCountRes.count || 0;
+        if (tabSpans[3]) tabSpans[3].textContent = flexibleCountRes.count || 0;
+        if (tabSpans[4]) tabSpans[4].textContent = completedBadgeRes.count || 0;
 
         const completedCountToday = allCompletedTasks ? allCompletedTasks.filter(task => {
             if (!task.completed_at) return false;
@@ -56,7 +59,7 @@ export async function loadAccueilData(currentTab = 'today') {
             return completedDateOnly === today;
         }) : [];
 
-        // 1. ⚡ ON MET À JOUR LE STREAK EN BDD EN PREMIER
+        // Premier Streak Check : On vérifie si l'utilisateur a complété ses tâches aujourd'hui et on incrémente le streak si nécessaire
         try {
             await checkAndIncrementStreak(localUser.id, completedCountToday.length);
             
@@ -71,7 +74,7 @@ export async function loadAccueilData(currentTab = 'today') {
             console.error("Erreur mineure (streak non bloquant) :", streakError);
         }
 
-        // 2. ⚡ MAINTENANT ON AFFICHE LE PROFIL (avec les données à jour, ex: streak à 0)
+        // Profile Stats Update : On met à jour les stats du profil 
         if (profile) {
             const streakCount = document.getElementById('streak-count-display');
             if (streakCount) streakCount.textContent = profile.current_streak ?? 0;
@@ -126,6 +129,7 @@ export async function loadAccueilData(currentTab = 'today') {
         if (tasksContainer) {
             if (!tasks || tasks.length === 0) {
                 let emptyMessage = "Vous n'avez pas de tâches aujourd'hui";
+                if (currentTab === 'overdue') emptyMessage = "Aucune tâche en retard 🎉";
                 if (currentTab === 'upcoming') emptyMessage = "Aucune tâche à venir";
                 if (currentTab === 'flexible') emptyMessage = "Aucune tâche flexible";
                 if (currentTab === 'completed') emptyMessage = "Aucune tâche complétée pour l'instant";
@@ -156,12 +160,14 @@ export async function loadAccueilData(currentTab = 'today') {
     }
 }
 
-// Petite fonction utilitaire interne pour la requête dynamique de l'onglet
+// Fonction utilitaire pour la requête dynamique de l'onglet
 function fetchTasksForTab(userId, currentTab, today) {
     let query = supabase.from('tasks').select('*').eq('user_id', userId);
 
     if (currentTab === 'today') {
         query = query.eq('task_type', 'dated').eq('due_date', today).eq('status', 'pending');
+    } else if (currentTab === 'overdue') {
+        query = query.eq('task_type', 'dated').lt('due_date', today).eq('status', 'pending').order('due_date', { ascending: true }); // 👈 Ajouté ici
     } else if (currentTab === 'upcoming') {
         query = query.eq('task_type', 'dated').gt('due_date', today).eq('status', 'pending').order('due_date', { ascending: true });
     } else if (currentTab === 'flexible') {
