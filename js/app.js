@@ -2,7 +2,7 @@ import { supabase } from './supabaseClient.js';
 import { getTodayDate, isGoalReachedToday } from './utils.js';
 
 export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
-    const today = getTodayDate();
+    const today = getTodayDate(); // Format "YYYY-MM-DD"
 
     try {
         let { data: profile, error } = await supabase
@@ -20,70 +20,90 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
 
         const goalReachedToday = isGoalReachedToday(completedCountToday);
 
-        // Si on est le même jour que le dernier streak enregistré
-        if (lastStreakDate === today) {
-            if (!goalReachedToday) {
-                // Si l'utilisateur décoche et passe sous l'objectif aujourd'hui
-                currentStreak = Math.max(0, currentStreak - 1);
-                lastStreakDate = null; 
-            } else if (goalReachedToday && currentStreak === 0) {
-                currentStreak = 1;
-            } else {
-                return; 
-            }
-        } 
-        // Premier Streak : si jamais validé auparavant
-        else if (!lastStreakDate) {
-            currentStreak = goalReachedToday ? 1 : 0;
-            if (goalReachedToday) {
-                lastStreakDate = today;
-            }
-        } 
-        // Si on est un ou plusieurs jours après le dernier streak enregistré
-        else {
-            const lastDate = new Date(lastStreakDate);
-            const currentDate = new Date(today);
-            const diffDays = Math.round((currentDate - lastDate) / (1000 * 60 * 60 * 24));
+        // Fonction utilitaire locale pour calculer l'écart en jours de manière securisee sans UTC bug
+        const getDayDifference = (dateStr1, dateStr2) => {
+            const d1 = new Date(dateStr1 + 'T00:00:00');
+            const d2 = new Date(dateStr2 + 'T00:00:00');
+            return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+        };
 
-            if (diffDays === 1) {
-                // Le lendemain : on laisse l'utilisateur tranquille pour atteindre son objectif aujourd'hui.
-            } else if (diffDays > 1) {
-                // Plusieurs jours manqués : on consomme un gel si disponible, sinon on reset à 0
-                if (freezesCount > 0) {
-                    freezesCount -= 1;
-                    //  Le gel protège la streak, on met donc à jour la date de référence 
-                    // pour que le gel ne soit consommé qu'une seule fois pour cette absence.
-                    lastStreakDate = today; 
-                } else {
-                    currentStreak = 0;
+        // Si l'utilisateur n'a jamais validé de streak
+        if (!lastStreakDate) {
+            if (goalReachedToday) {
+                currentStreak = 1;
+                lastStreakDate = today;
+            } else {
+                currentStreak = 0;
+            }
+        } 
+        else {
+            const diffDays = getDayDifference(lastStreakDate, today);
+
+            //  La dernière validation a eu lieu Aujourd'hui (diffDays === 0) 
+            if (diffDays === 0) {
+                if (!goalReachedToday) {
+                    // On retire le +1 du jour
+                    currentStreak = Math.max(0, currentStreak - 1);
+                    
+                    // Si on annule la journée d'aujourd'hui, on remet last_streak_date à hier
+                    // pour que le système sache que le dernier vrai jour validé était hier
+                    const yesterdayObj = new Date(today + 'T00:00:00');
+                    yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+                    lastStreakDate = yesterdayObj.toISOString().split('T')[0];
+
+                    // Si le streak tombe à 0, lastStreakDate devient null
+                    if (currentStreak === 0) {
+                        lastStreakDate = null;
+                    }
                 }
             }
-
-            // Si l'objectif du jour est atteint, on valide la journée d'aujourd'hui
-            if (goalReachedToday) {
-                lastStreakDate = today;
-                if (diffDays === 1) {
-                    currentStreak += 1; // Incrémente car on est le lendemain et l'objectif est atteint
-                } else if (currentStreak === 0) {
-                    currentStreak = 1;
+            //  La dernière validation date d'hier (diffDays === 1)
+            else if (diffDays === 1) {
+                if (goalReachedToday) {
+                    currentStreak += 1;
+                    lastStreakDate = today;
+                }
+                // Si l'objectif n'est pas encore atteint aujourd'hui, on ne touche à rien
+            }
+            //  La dernière validation date de plusiers jours (diffDays > 1)
+           else if (diffDays > 1) {
+                if (goalReachedToday) {
+                    // Si l'utilisateur valide ses tâches aujourd'hui malgré le retard, 
+                    // on incrémente le streak et on met à jour la date, sans gaspiller de gel !
+                    currentStreak += 1;
+                    lastStreakDate = today;
+                } 
+                else if (freezesCount > 0) {
+                    // S'il n'a pas atteint l'objectif mais qu'il a un gel, on consomme le gel pour sauver le streak
+                    freezesCount -= 1;
+                    
+                    // On avance virtuellement la date pour que le gel couvre la transition
+                    const lastDateObj = new Date(lastStreakDate + 'T00:00:00');
+                    lastDateObj.setDate(lastDateObj.getDate() + 1);
+                    lastStreakDate = lastDateObj.toISOString().split('T')[0];
+                } 
+                else {
+                    // Pas d'objectif atteint et plus de gels : le streak retombe à 0
+                    currentStreak = 0;
+                    lastStreakDate = null;
                 }
             }
         }
 
         const newLongest = Math.max(longestStreak, currentStreak);
 
-        // Mise à jour dans Supabase
+        // Sauvegarde propre dans Supabase
         await supabase
             .from('profiles')
             .update({
                 current_streak: currentStreak,
                 longest_streak: newLongest,
                 freezes_count: freezesCount,
-                last_streak_date: goalReachedToday ? today : lastStreakDate
+                last_streak_date: lastStreakDate
             })
             .eq('id', userId);
 
-        console.log("Vérification du streak effectuée. Streak actuel :", currentStreak);
+        console.log("Streak mis à jour avec succès :", currentStreak);
 
     } catch (err) {
         console.error("Erreur lors de la vérification du streak :", err.message);
