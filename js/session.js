@@ -99,7 +99,7 @@ export async function loadAccueilData(currentTab = 'today') {
 
         if (profile && profile.freeze_used_notification) {
             // Affiche ton message ou ton popup d'alerte
-            alert("Ouf ! Un gel de streak a été utilisé automatiquement pour sauver votre série suite à votre absence.");
+            alert("Série sauvée ! Un gel a été utilisé automatiquement.");
 
             // Réinitialise le flag dans Supabase pour ne plus afficher l'alerte au prochain rechargement
             await supabase
