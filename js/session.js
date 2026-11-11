@@ -87,6 +87,25 @@ export async function loadAccueilData(currentTab = 'today') {
 
             const currentStreak = document.getElementById('current-streak-stat');
             if (currentStreak) currentStreak.textContent = `${profile.current_streak ?? 0} jours`;
+
+            const daysIntoCycle = (profile.current_streak ?? 0) % 7;
+            const percentage = (daysIntoCycle / 7) * 100;
+
+            const progressFill = document.getElementById('gel-progress-fill');
+            const progressText = document.getElementById('gel-progress-text');
+            if (progressFill) progressFill.style.width = `${percentage}%`;
+            if (progressText) progressText.textContent = `${daysIntoCycle} / 7 jours`;
+        }
+
+        if (profile && profile.freeze_used_notification) {
+            // Affiche ton message ou ton popup d'alerte
+            alert("Ouf ! Un gel de streak a été utilisé automatiquement pour sauver votre série suite à votre absence.");
+
+            // Réinitialise le flag dans Supabase pour ne plus afficher l'alerte au prochain rechargement
+            await supabase
+                .from('profiles')
+                .update({ freeze_used_notification: false })
+                .eq('id', localUser.id);
         }
 
         const tasksProgress = document.getElementById('tasks-progress-display');

@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient.js';
-import { getTodayDate, isGoalReachedToday } from './utils.js';
+import { getTodayDate, isGoalReachedToday,handleFreezes } from './utils.js';
 
 export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
     const today = getTodayDate(); // Format "YYYY-MM-DD"
@@ -17,6 +17,7 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
         let currentStreak = profile.current_streak || 0;
         let longestStreak = profile.longest_streak || 0;
         let freezesCount = profile.freezes_count || 0;
+        let freezeUsedNotification = profile.freeze_used_notification || false;
 
         const goalReachedToday = isGoalReachedToday(completedCountToday);
 
@@ -73,19 +74,20 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
                     currentStreak += 1;
                     lastStreakDate = today;
                 } 
-                else if (freezesCount > 0) {
-                    // S'il n'a pas atteint l'objectif mais qu'il a un gel, on consomme le gel pour sauver le streak
-                    freezesCount -= 1;
-                    
-                    // On avance virtuellement la date pour que le gel couvre la transition
-                    const lastDateObj = new Date(lastStreakDate + 'T00:00:00');
-                    lastDateObj.setDate(lastDateObj.getDate() + 1);
-                    lastStreakDate = lastDateObj.toISOString().split('T')[0];
-                } 
-                else {
-                    // Pas d'objectif atteint et plus de gels : le streak retombe à 0
+                
+
+                else if (!goalReachedToday && freezesCount === 0 ) {
                     currentStreak = 0;
                     lastStreakDate = null;
+                }
+
+                else {
+                    // Sinon, on laisse handleFreezes gérer soit le gain de gel, soit la consommation d'un gel
+                    const freezeResult = handleFreezes(currentStreak, freezesCount, freezeUsedNotification, goalReachedToday, lastStreakDate, today);
+        
+                    freezesCount = freezeResult.freezesCount;
+                    freezeUsedNotification = freezeResult.freezeUsedNotification;
+                    lastStreakDate = freezeResult.lastStreakDate;
                 }
             }
         }
@@ -99,7 +101,8 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
                 current_streak: currentStreak,
                 longest_streak: newLongest,
                 freezes_count: freezesCount,
-                last_streak_date: lastStreakDate
+                last_streak_date: lastStreakDate,
+                freeze_used_notification: freezeUsedNotification
             })
             .eq('id', userId);
 
