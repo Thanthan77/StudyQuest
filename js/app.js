@@ -18,6 +18,7 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
         let longestStreak = profile.longest_streak || 0;
         let freezesCount = profile.freezes_count || 0;
         let freezeUsedNotification = profile.freeze_used_notification || false;
+        let freezeEarnedNotification = profile.freeze_earned_notification || false;
 
         const goalReachedToday = isGoalReachedToday(completedCountToday);
 
@@ -33,6 +34,10 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
             if (goalReachedToday) {
                 currentStreak = 1;
                 lastStreakDate = today;
+                if (currentStreak > 0 && currentStreak % 7 === 0) {
+                    freezesCount += 1;
+                    freezeEarnedNotification = true;
+                }
             } else {
                 currentStreak = 0;
             }
@@ -51,7 +56,10 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
                     const yesterdayObj = new Date(today + 'T00:00:00');
                     yesterdayObj.setDate(yesterdayObj.getDate() - 1);
                     lastStreakDate = yesterdayObj.toISOString().split('T')[0];
-
+                    
+                    if ((currentStreak + 1) > 0 && (currentStreak + 1) % 7 === 0) {
+                        freezesCount = Math.max(0, freezesCount - 1);
+                    }
                     // Si le streak tombe à 0, lastStreakDate devient null
                     if (currentStreak === 0) {
                         lastStreakDate = null;
@@ -63,8 +71,11 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
                 if (goalReachedToday) {
                     currentStreak += 1;
                     lastStreakDate = today;
+                    if (currentStreak > 0 && currentStreak % 7 === 0) {
+                        freezesCount += 1;
+                        freezeEarnedNotification = true;
+                    }
                 }
-                // Si l'objectif n'est pas encore atteint aujourd'hui, on ne touche à rien
             }
             //  La dernière validation date de plusiers jours (diffDays > 1)
            else if (diffDays > 1) {
@@ -73,6 +84,10 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
                     // on incrémente le streak et on met à jour la date, sans gaspiller de gel !
                     currentStreak += 1;
                     lastStreakDate = today;
+                    if (currentStreak > 0 && currentStreak % 7 === 0) {
+                        freezesCount += 1;
+                        freezeEarnedNotification = true;
+                    }
                 } 
                 
 
@@ -102,6 +117,7 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
                 longest_streak: newLongest,
                 freezes_count: freezesCount,
                 last_streak_date: lastStreakDate,
+                freeze_earned_notification: freezeEarnedNotification,
                 freeze_used_notification: freezeUsedNotification
             })
             .eq('id', userId);

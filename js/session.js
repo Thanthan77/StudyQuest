@@ -108,6 +108,16 @@ export async function loadAccueilData(currentTab = 'today') {
                 .eq('id', localUser.id);
         }
 
+        if (profile && profile.freeze_earned_notification) {
+            alert(" Gel gagné ! Il protégera automatiquement votre série si vous ratez un jour.");
+
+            // Réinitialise le flag dans Supabase pour ne plus l'afficher au prochain rechargement
+            await supabase
+                .from('profiles')
+                .update({ freeze_earned_notification: false })
+                .eq('id', localUser.id);
+        }
+
         const tasksProgress = document.getElementById('tasks-progress-display');
         if (tasksProgress) tasksProgress.textContent = `${completedCountToday.length}/2 tâches validées aujourd'hui`;
 
