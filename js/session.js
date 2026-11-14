@@ -52,11 +52,20 @@ export async function loadAccueilData(currentTab = 'today') {
             return false;
         });
 
+        const upcomingRecurring = (recurringTasksRes.data || []).filter(task => {
+            if (task.recurrence_type === 'daily') return true; // Les quotidiennes sont toujours à venir
+            if (task.recurrence_type === 'weekly' && Array.isArray(task.recurrence_days)) {
+            // Les hebdo prévues pour un autre jour que aujourd'hui
+                return task.recurrence_days.some(day => day !== todayDayOfWeek);
+            }
+            return false;
+        });
+
         const tabSpans = document.querySelectorAll('.tasks-tabs .tab-btn span');
         // Correction des parenthèses pour additionner correctement les tâches datées et récurrentes
         if (tabSpans[0]) tabSpans[0].textContent = (todayCountRes.count || 0) + recurringToday.length;
-        if (tabSpans[1]) tabSpans[1].textContent = overdueCountRes.count || 0;
-        if (tabSpans[2]) tabSpans[2].textContent = upcomingCountRes.count || 0;
+        if (tabSpans[1]) tabSpans[1].textContent = overdueCountRes.count || 0 ;
+        if (tabSpans[2]) tabSpans[2].textContent = upcomingCountRes.count || 0 + upcomingRecurring.length;
         if (tabSpans[3]) tabSpans[3].textContent = flexibleCountRes.count || 0;
         if (tabSpans[4]) tabSpans[4].textContent = completedBadgeRes.count || 0;
 
@@ -173,24 +182,37 @@ export async function loadAccueilData(currentTab = 'today') {
 
                 tasksContainer.innerHTML = `<div class="empty-state-tasks">${emptyMessage}</div>`;
             } else {
-                tasksContainer.innerHTML = tasks.map(task => {
-                    const isCompleted = task.status === 'completed';
-                    const isSchool = task.category === 'school';
-                    return `
-                        <div class="task-item ${isCompleted ? 'completed' : ''}" data-id="${task.id}">
-                            <label class="task-check" style="cursor: pointer;">
-                                <input type="checkbox" class="native-task-checkbox" ${isCompleted ? 'checked' : ''} style="cursor: pointer;">
-                            </label>
-                            <span class="task-name">${task.title}</span>
-                            ${task.due_date ? `<span class="task-date"><i class="fa-regular fa-calendar"></i> ${task.due_date}</span>` : ''}
-                            ${task.task_type === 'recurring' ? `<span class="task-date"><i class="fa-solid fa-rotate"></i> ${task.recurrence_type === 'daily' ? 'Quotidienne' : 'Hebdo'}</span>` : ''}
-                            <span class="task-tag ${isSchool ? 'school' : 'perso'}">${isSchool ? 'École' : 'Perso'}</span>
-                            <div class="task-actions">
-                                <i class="fa-solid fa-pen edit-task-btn"></i> 
-                                <i class="fa-solid fa-trash delete-task-btn"></i>
-                            </div>
-                        </div>`;
-                }).join('');
+             tasksContainer.innerHTML = tasks.map(task => {
+                const isCompleted = task.status === 'completed';
+                 const isSchool = task.category === 'school';
+        
+                // Logique d'affichage du badge récurrent avec les jours détaillés
+                let recurrenceBadgeHtml = '';
+                if (task.task_type === 'recurring') {
+                    if (task.recurrence_type === 'daily') {
+                        recurrenceBadgeHtml = `<span class="task-date"><i class="fa-solid fa-rotate"></i> Quotidienne</span>`;
+                    } else if (task.recurrence_type === 'weekly' && Array.isArray(task.recurrence_days)) {
+                        const dayMap = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+                        const daysStr = task.recurrence_days.map(d => dayMap[d]).join(', ');
+                        recurrenceBadgeHtml = `<span class="task-date"><i class="fa-solid fa-rotate"></i> Hebdo - ${daysStr}</span>`;
+                    }
+            }
+
+            return `
+                <div class="task-item ${isCompleted ? 'completed' : ''}" data-id="${task.id}">
+                    <label class="task-check" style="cursor: pointer;">
+                        <input type="checkbox" class="native-task-checkbox" ${isCompleted ? 'checked' : ''} style="cursor: pointer;">
+                    </label>
+                <span class="task-name">${task.title}</span>
+                ${task.due_date ? `<span class="task-date"><i class="fa-regular fa-calendar"></i> ${task.due_date}</span>` : ''}
+                ${recurrenceBadgeHtml}
+                <span class="task-tag ${isSchool ? 'school' : 'perso'}">${isSchool ? 'École' : 'Perso'}</span>
+                <div class="task-actions">
+                    <i class="fa-solid fa-pen edit-task-btn"></i> 
+                    <i class="fa-solid fa-trash delete-task-btn"></i>
+                </div>
+                </div>`;
+            }).join('');
             }
         }
     } catch (err) {
@@ -229,7 +251,7 @@ async function fetchTasksForTab(userId, currentTab, today, todayDayOfWeek) {
         query = query.eq('task_type', 'dated').lt('due_date', today).eq('status', 'pending').order('due_date', { ascending: true });
         
     } else if (currentTab === 'upcoming') {
-        //  On récupère les 'dated' futures ET les 'recurring' de type weekly
+        // Récupérer les tâches datées à venir et les récurrentes hebdomadaires qui ne sont pas prévues pour aujourd'hui
         const { data, error } = await supabase
             .from('tasks')
             .select('*')
@@ -239,11 +261,10 @@ async function fetchTasksForTab(userId, currentTab, today, todayDayOfWeek) {
 
         if (error) return { data: [], error };
 
+        // On filtre pour ne garder que les récurrentes hebdomadaires ayant au moins un jour prévu différent d'aujourd'hui
         const filteredData = (data || []).filter(task => {
             if (task.task_type === 'dated') return true;
             if (task.task_type === 'recurring' && Array.isArray(task.recurrence_days)) {
-                // On garde la tâche si l'un de ses jours récurrents n'est PAS aujourd'hui 
-                // (ou tu peux affiner pour ne garder que les jours strictement après todayDayOfWeek)
                 return task.recurrence_days.some(day => day !== todayDayOfWeek);
             }
             return false;

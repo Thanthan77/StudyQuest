@@ -1,3 +1,4 @@
+import { supabase } from './supabaseClient.js';
 export function getTodayDate() {
     const d = new Date();
     const year = d.getFullYear();
@@ -92,4 +93,17 @@ export async function checkAndResetRecurringTasks(userId) {
     } catch (err) {
         console.error("Erreur dans checkAndResetRecurringTasks :", err.message);
     }
+}
+
+export function formatRecurrenceBadge(task) {
+    if (task.task_type !== 'recurring') return '';
+    
+    if (task.recurrence_type === 'daily') {
+        return `<span class="task-date"><i class="fa-solid fa-rotate"></i> Quotidienne</span>`;
+    } else if (task.recurrence_type === 'weekly' && Array.isArray(task.recurrence_days)) {
+        const dayMap = ['D', 'L', 'M', 'M', 'J', 'V', 'S']; // 0 = Dimanche, 1 = Lundi...
+        const daysStr = task.recurrence_days.map(d => dayMap[d]).join(', ');
+        return `<span class="task-date"><i class="fa-solid fa-rotate"></i> Hebdo (${daysStr})</span>`;
+    }
+    return '';
 }
