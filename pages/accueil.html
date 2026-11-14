@@ -167,6 +167,28 @@
                 </div>
             </div>
 
+            <div class="form-group" id="recurrence-container" style="display: none;">
+                <label>Fréquence de récurrence</label>
+                <div class="toggle-options">
+                    <button type="button" class="rec-btn active" data-rec="daily">Tous les jours</button>
+                    <button type="button" class="rec-btn" data-rec="weekly">Jours précis de la semaine</button>
+                </div>
+
+                <!-- Sélection des jours de la semaine (caché par défaut si "Tous les jours" est actif) -->
+                <div id="weekly-days-container" style="display: none; margin-top: 12px;">
+                    <label style="font-size: 0.85rem; margin-bottom: 6px; display: block; color: var(--text-muted);">Sélectionne les jours :</label>
+                    <div class="days-selector" style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <label class="day-chip"><input type="checkbox" name="rec-day" value="1"> L</label>
+                        <label class="day-chip"><input type="checkbox" name="rec-day" value="2"> M</label>
+                        <label class="day-chip"><input type="checkbox" name="rec-day" value="3"> M</label>
+                        <label class="day-chip"><input type="checkbox" name="rec-day" value="4"> J</label>
+                        <label class="day-chip"><input type="checkbox" name="rec-day" value="5"> V</label>
+                        <label class="day-chip"><input type="checkbox" name="rec-day" value="6"> S</label>
+                        <label class="day-chip"><input type="checkbox" name="rec-day" value="0"> D</label>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label>Catégorie</label>
                 <div class="category-options">
@@ -175,6 +197,9 @@
                     </button>
                     <button type="button" class="category-btn" data-category="perso">
                         <i class="fa-solid fa-user"></i> Personnel
+                    </button>
+                    <button type="button" class="toggle-btn" data-when="recurring">
+                        <i class="fa-solid fa-rotate"></i> Récurrente
                     </button>
                 </div>
             </div>

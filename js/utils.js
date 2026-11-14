@@ -48,3 +48,48 @@ export function handleFreezes(currentStreak, freezesCount, freezeUsedNotificatio
         lastStreakDate: updatedLastStreakDate
     };
 }
+
+export async function checkAndResetRecurringTasks(userId) {
+    const today = getTodayDate();
+
+    try {
+        // Récupérer toutes les tâches récurrentes de l'utilisateur qui sont complétées
+        const { data: recurringTasks, error } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('task_type', 'recurring')
+            .eq('status', 'completed');
+
+        if (error) throw error;
+        if (!recurringTasks || recurringTasks.length === 0) return;
+
+        // Vérifier chaque tâche complétée
+        for (const task of recurringTasks) {
+            if (!task.completed_at) continue;
+
+            const taskDate = new Date(task.completed_at);
+            const year = taskDate.getFullYear();
+            const month = String(taskDate.getMonth() + 1).padStart(2, '0');
+            const day = String(taskDate.getDate()).padStart(2, '0');
+            const completedDateOnly = `${year}-${month}-${day}`;
+
+            // Si la tâche a été complétée un jour PRÉCÉDENT, on la remet en 'pending'
+            if (completedDateOnly < today) {
+                const { error: updateError } = await supabase
+                    .from('tasks')
+                    .update({
+                        status: 'pending',
+                        completed_at: null
+                    })
+                    .eq('id', task.id);
+
+                if (updateError) {
+                    console.error(`Erreur lors de la réinitialisation de la tâche récurrente ${task.id} :`, updateError.message);
+                }
+            }
+        }
+    } catch (err) {
+        console.error("Erreur dans checkAndResetRecurringTasks :", err.message);
+    }
+}

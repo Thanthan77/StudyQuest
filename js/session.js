@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient.js';
-import { getTodayDate, isGoalReachedToday } from './utils.js';
+import { getTodayDate, isGoalReachedToday,checkAndResetRecurringTasks } from './utils.js';
 import { checkAndIncrementStreak } from './app.js';
 
 export async function loadAccueilData(currentTab = 'today') {
@@ -14,8 +14,10 @@ export async function loadAccueilData(currentTab = 'today') {
     if (usernameDisplay) usernameDisplay.textContent = localUser.username;
 
     const today = getTodayDate();
+    const todayDayOfWeek = new Date().getDay(); 
 
     try {
+        await checkAndResetRecurringTasks(localUser.id);
         // Promise.all : On lance toutes les lectures Supabase en même temps pour zéro latence
         const [
             profileRes,
@@ -25,23 +27,34 @@ export async function loadAccueilData(currentTab = 'today') {
             flexibleCountRes,
             completedBadgeRes,
             allCompletedTasksRes,
+            recurringTasksRes,
             tasksRes
         ] = await Promise.all([
             supabase.from('profiles').select('*').eq('id', localUser.id).single(),
             supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('task_type', 'dated').eq('due_date', today).eq('status', 'pending'),
-            supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('task_type', 'dated').lt('due_date', today).eq('status', 'pending'), // 👈 Corrigé ici (.lt au lieu de .gt)
+            supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('task_type', 'dated').lt('due_date', today).eq('status', 'pending'), 
             supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('task_type', 'dated').gt('due_date', today).eq('status', 'pending'),
             supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('task_type', 'flexible').eq('status', 'pending'),
             supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('user_id', localUser.id).eq('status', 'completed'),
             supabase.from('tasks').select('*').eq('user_id', localUser.id).eq('status', 'completed'),
-            fetchTasksForTab(localUser.id, currentTab, today)
+            supabase.from('tasks').select('*').eq('user_id', localUser.id).eq('task_type', 'recurring').eq('status', 'pending'),
+            fetchTasksForTab(localUser.id, currentTab, today, todayDayOfWeek)
         ]);
 
         let profile = profileRes.data;
         let allCompletedTasks = allCompletedTasksRes.data;
 
+        const recurringToday = (recurringTasksRes.data || []).filter(task => {
+            if (task.recurrence_type === 'daily') return true;
+            if (task.recurrence_type === 'weekly' && Array.isArray(task.recurrence_days)) {
+                return task.recurrence_days.includes(todayDayOfWeek);
+            }
+            return false;
+        });
+
         const tabSpans = document.querySelectorAll('.tasks-tabs .tab-btn span');
-        if (tabSpans[0]) tabSpans[0].textContent = todayCountRes.count || 0;
+        // Correction des parenthèses pour additionner correctement les tâches datées et récurrentes
+        if (tabSpans[0]) tabSpans[0].textContent = (todayCountRes.count || 0) + recurringToday.length;
         if (tabSpans[1]) tabSpans[1].textContent = overdueCountRes.count || 0;
         if (tabSpans[2]) tabSpans[2].textContent = upcomingCountRes.count || 0;
         if (tabSpans[3]) tabSpans[3].textContent = flexibleCountRes.count || 0;
@@ -98,10 +111,7 @@ export async function loadAccueilData(currentTab = 'today') {
         }
 
         if (profile && profile.freeze_used_notification) {
-            // Affiche ton message ou ton popup d'alerte
             alert("Série sauvée ! Un gel a été utilisé automatiquement.");
-
-            // Réinitialise le flag dans Supabase pour ne plus afficher l'alerte au prochain rechargement
             await supabase
                 .from('profiles')
                 .update({ freeze_used_notification: false })
@@ -110,8 +120,6 @@ export async function loadAccueilData(currentTab = 'today') {
 
         if (profile && profile.freeze_earned_notification) {
             alert(" Gel gagné ! Il protégera automatiquement votre série si vous ratez un jour.");
-
-            // Réinitialise le flag dans Supabase pour ne plus l'afficher au prochain rechargement
             await supabase
                 .from('profiles')
                 .update({ freeze_earned_notification: false })
@@ -175,6 +183,7 @@ export async function loadAccueilData(currentTab = 'today') {
                             </label>
                             <span class="task-name">${task.title}</span>
                             ${task.due_date ? `<span class="task-date"><i class="fa-regular fa-calendar"></i> ${task.due_date}</span>` : ''}
+                            ${task.task_type === 'recurring' ? `<span class="task-date"><i class="fa-solid fa-rotate"></i> ${task.recurrence_type === 'daily' ? 'Quotidienne' : 'Hebdo'}</span>` : ''}
                             <span class="task-tag ${isSchool ? 'school' : 'perso'}">${isSchool ? 'École' : 'Perso'}</span>
                             <div class="task-actions">
                                 <i class="fa-solid fa-pen edit-task-btn"></i> 
@@ -190,15 +199,58 @@ export async function loadAccueilData(currentTab = 'today') {
 }
 
 // Fonction utilitaire pour la requête dynamique de l'onglet
-function fetchTasksForTab(userId, currentTab, today) {
+async function fetchTasksForTab(userId, currentTab, today, todayDayOfWeek) {
     let query = supabase.from('tasks').select('*').eq('user_id', userId);
 
     if (currentTab === 'today') {
-        query = query.eq('task_type', 'dated').eq('due_date', today).eq('status', 'pending');
+        const { data, error } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'pending')
+            .or(`and(task_type.eq.dated,due_date.eq.${today}),task_type.eq.recurring`);
+
+        if (error) return { data: [], error };
+
+        const filteredData = (data || []).filter(task => {
+            if (task.task_type === 'dated') return true;
+            if (task.task_type === 'recurring') {
+                if (task.recurrence_type === 'daily') return true;
+                if (task.recurrence_type === 'weekly' && Array.isArray(task.recurrence_days)) {
+                    return task.recurrence_days.includes(todayDayOfWeek);
+                }
+            }
+            return false;
+        });
+
+        return { data: filteredData, error: null };
+
     } else if (currentTab === 'overdue') {
-        query = query.eq('task_type', 'dated').lt('due_date', today).eq('status', 'pending').order('due_date', { ascending: true }); // 👈 Ajouté ici
+        query = query.eq('task_type', 'dated').lt('due_date', today).eq('status', 'pending').order('due_date', { ascending: true });
+        
     } else if (currentTab === 'upcoming') {
-        query = query.eq('task_type', 'dated').gt('due_date', today).eq('status', 'pending').order('due_date', { ascending: true });
+        //  On récupère les 'dated' futures ET les 'recurring' de type weekly
+        const { data, error } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'pending')
+            .or(`and(task_type.eq.dated,due_date.gt.${today}),and(task_type.eq.recurring,recurrence_type.eq.weekly)`);
+
+        if (error) return { data: [], error };
+
+        const filteredData = (data || []).filter(task => {
+            if (task.task_type === 'dated') return true;
+            if (task.task_type === 'recurring' && Array.isArray(task.recurrence_days)) {
+                // On garde la tâche si l'un de ses jours récurrents n'est PAS aujourd'hui 
+                // (ou tu peux affiner pour ne garder que les jours strictement après todayDayOfWeek)
+                return task.recurrence_days.some(day => day !== todayDayOfWeek);
+            }
+            return false;
+        });
+
+        return { data: filteredData, error: null };
+
     } else if (currentTab === 'flexible') {
         query = query.eq('task_type', 'flexible').eq('status', 'pending');
     } else if (currentTab === 'completed') {
