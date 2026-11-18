@@ -14,8 +14,9 @@ export function isGoalReachedToday(completedTasks) {
     return false;
 }
 
-export function handleFreezes(currentStreak, freezesCount, freezeUsedNotification, goalReachedToday, lastStreakDate, today) {
+export function handleFreezes(currentStreak, freezesCount, totalFreezesUsed, freezeUsedNotification, goalReachedToday, lastStreakDate, today) {
     let updatedFreezesCount = freezesCount;
+    let updatedTotalFreezesUsed = totalFreezesUsed || 0;
     let updatedNotification = freezeUsedNotification;
     let updatedLastStreakDate = lastStreakDate;
 
@@ -31,6 +32,7 @@ export function handleFreezes(currentStreak, freezesCount, freezeUsedNotificatio
     //  Si l'objectif n'est pas atteint et qu'il y a un trou (utilisation d'un gel)
     else if (updatedFreezesCount > 0) {
         updatedFreezesCount -= 1;
+        updatedTotalFreezesUsed += 1;
         updatedNotification = true; // Active l'alerte pour la prochaine connexion
         
         // Avancement virtuel de la date pour couvrir la transition du gel
@@ -45,6 +47,7 @@ export function handleFreezes(currentStreak, freezesCount, freezeUsedNotificatio
 
     return {
         freezesCount: updatedFreezesCount,
+        totalFreezesUsed: updatedTotalFreezesUsed,
         freezeUsedNotification: updatedNotification,
         lastStreakDate: updatedLastStreakDate
     };
