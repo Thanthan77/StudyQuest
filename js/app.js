@@ -17,6 +17,7 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
         let currentStreak = profile.current_streak || 0;
         let longestStreak = profile.longest_streak || 0;
         let freezesCount = profile.freezes_count || 0;
+        let totalFreezesUsed = profile.total_freezes_used || 0;
         let freezeUsedNotification = profile.freeze_used_notification || false;
         let freezeEarnedNotification = profile.freeze_earned_notification || false;
 
@@ -98,9 +99,10 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
 
                 else {
                     // Sinon, on laisse handleFreezes gérer soit le gain de gel, soit la consommation d'un gel
-                    const freezeResult = handleFreezes(currentStreak, freezesCount, freezeUsedNotification, goalReachedToday, lastStreakDate, today);
+                    const freezeResult = handleFreezes(currentStreak, freezesCount,totalFreezesUsed, freezeUsedNotification, goalReachedToday, lastStreakDate, today);
         
                     freezesCount = freezeResult.freezesCount;
+                    totalFreezesUsed = freezeResult.totalFreezesUsed;
                     freezeUsedNotification = freezeResult.freezeUsedNotification;
                     lastStreakDate = freezeResult.lastStreakDate;
                 }
@@ -116,6 +118,7 @@ export async function checkAndIncrementStreak(userId, completedCountToday = 0) {
                 current_streak: currentStreak,
                 longest_streak: newLongest,
                 freezes_count: freezesCount,
+                total_freezes_used: totalFreezesUsed,
                 last_streak_date: lastStreakDate,
                 freeze_earned_notification: freezeEarnedNotification,
                 freeze_used_notification: freezeUsedNotification

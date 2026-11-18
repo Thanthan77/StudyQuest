@@ -52,7 +52,7 @@ export function initTasksModule(onDataChangeCallback) {
         selectedCategory = category;
         selectedRecurrenceType = recType;
 
-        // 1. Boutons de type principal (specific, flexible, recurring)
+        // Boutons de type principal (specific, flexible, recurring)
         document.querySelectorAll('.toggle-btn').forEach(b => {
             const when = b.getAttribute('data-when');
             let targetWhen = 'specific';
@@ -61,7 +61,7 @@ export function initTasksModule(onDataChangeCallback) {
             b.classList.toggle('active', when === targetWhen);
         });
 
-        // 2. Affichage des conteneurs selon le type de tâche
+        // Affichage des conteneurs selon le type de tâche
         if (dateContainer) {
             dateContainer.style.display = (type === 'dated') ? 'block' : 'none';
         }
@@ -69,7 +69,7 @@ export function initTasksModule(onDataChangeCallback) {
             recurrenceContainer.style.display = (type === 'recurring') ? 'block' : 'none';
         }
 
-        // 3. Boutons de sous-fréquence (daily / weekly)
+        // Boutons de sous-fréquence (daily / weekly)
         document.querySelectorAll('.rec-btn').forEach(b => {
             const rec = b.getAttribute('data-rec');
             b.classList.toggle('active', rec === recType);
@@ -79,12 +79,12 @@ export function initTasksModule(onDataChangeCallback) {
             weeklyDaysContainer.style.display = (recType === 'weekly' && type === 'recurring') ? 'block' : 'none';
         }
 
-        // 4. Cocher les jours de la semaine si présents
+        // Cocher les jours de la semaine si présents
         document.querySelectorAll('input[name="rec-day"]').forEach(cb => {
             cb.checked = recDays.includes(parseInt(cb.value));
         });
 
-        // 5. Catégorie
+        // Catégorie
         document.querySelectorAll('.category-btn').forEach(b => {
             const catAttr = b.getAttribute('data-category');
             const targetCat = (category === 'personal' ? 'perso' : 'school');
@@ -131,7 +131,7 @@ export function initTasksModule(onDataChangeCallback) {
         });
     });
 
-    // --- SOUMISSION DU FORMULAIRE ---
+    // Soumission du formulaire pour ajouter ou modifier une tâche
     if (addTaskForm) {
         addTaskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -204,7 +204,7 @@ export function initTasksModule(onDataChangeCallback) {
         });
     }
 
-    // --- ACTIONS SUR LES TÂCHES (Compléter, Supprimer, Modifier) ---
+    // Action sur les tâches (compléter, supprimer, modifier)
     if (tasksContainer) {
         tasksContainer.addEventListener('click', async (e) => {
             const taskItem = e.target.closest('.task-item');
@@ -212,7 +212,7 @@ export function initTasksModule(onDataChangeCallback) {
             
             const taskId = taskItem.getAttribute('data-id');
 
-            // 1. Case à cocher (Compléter / Décocher)
+            // Case à cocher (Compléter / Décocher)
             const checkbox = e.target.closest('.native-task-checkbox');
             if (checkbox) {
                 if (isUpdating) return;
@@ -269,7 +269,7 @@ export function initTasksModule(onDataChangeCallback) {
                 }
             }
 
-            // 2. Supprimer
+            // Supprimer
             if (e.target.closest('.delete-task-btn')) {
                 if (confirm("Supprimer cette tâche ?")) {
                     try {
@@ -282,7 +282,7 @@ export function initTasksModule(onDataChangeCallback) {
                 }
             }
 
-            // 3. Modifier
+            // Modifier
             if (e.target.closest('.edit-task-btn')) {
                 try {
                     const { data: taskData, error } = await supabase.from('tasks').select('*').eq('id', taskId).single();
