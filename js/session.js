@@ -53,7 +53,6 @@ export async function loadAccueilData(currentTab = 'today') {
         });
 
         const upcomingRecurring = (recurringTasksRes.data || []).filter(task => {
-            if (task.recurrence_type === 'daily') return true; // Les quotidiennes sont toujours à venir
             if (task.recurrence_type === 'weekly' && Array.isArray(task.recurrence_days)) {
             // Les hebdo prévues pour un autre jour que aujourd'hui
                 return task.recurrence_days.some(day => day !== todayDayOfWeek);
@@ -65,7 +64,7 @@ export async function loadAccueilData(currentTab = 'today') {
         // Correction des parenthèses pour additionner correctement les tâches datées et récurrentes
         if (tabSpans[0]) tabSpans[0].textContent = (todayCountRes.count || 0) + recurringToday.length;
         if (tabSpans[1]) tabSpans[1].textContent = overdueCountRes.count || 0 ;
-        if (tabSpans[2]) tabSpans[2].textContent = upcomingCountRes.count || 0 + upcomingRecurring.length;
+        if (tabSpans[2]) tabSpans[2].textContent = (upcomingCountRes.count || 0) + upcomingRecurring.length;
         if (tabSpans[3]) tabSpans[3].textContent = flexibleCountRes.count || 0;
         if (tabSpans[4]) tabSpans[4].textContent = completedBadgeRes.count || 0;
 
