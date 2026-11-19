@@ -2,6 +2,9 @@ import { supabase } from './supabaseClient.js';
 import { getTodayDate } from './utils.js';
 
 export function initTasksModule(onDataChangeCallback) {
+
+     const storedUser = localStorage.getItem('studyquest_user');
+
     const modal = document.getElementById('task-modal');
     const openModalBtn = document.querySelector('.add-task-btn');
     const closeModalBtn = document.getElementById('close-modal-btn');
@@ -136,7 +139,6 @@ export function initTasksModule(onDataChangeCallback) {
         addTaskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const storedUser = localStorage.getItem('studyquest_user');
             if (!storedUser) {
                 alert("Erreur : Aucun utilisateur connecté.");
                 return;
@@ -281,6 +283,15 @@ export function initTasksModule(onDataChangeCallback) {
                     try {
                         const { error } = await supabase.from('tasks').delete().eq('id', taskId);
                         if (error) throw error;
+                        if (storedUser) {
+                            const userId = JSON.parse(storedUser).id;
+                            const { error: rpcError } = await supabase.rpc('decrement_tasks_created', {
+                                p_user_id: userId
+                            });
+                            if (rpcError) {
+                                console.error("Erreur lors de la décrémentation de total_tasks_created :", rpcError.message);
+                            }
+                        }
                         if (typeof onDataChangeCallback === 'function') onDataChangeCallback();
                     } catch (err) {
                         console.error("Erreur lors de la suppression :", err.message);
