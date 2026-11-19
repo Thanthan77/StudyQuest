@@ -180,6 +180,12 @@ export function initTasksModule(onDataChangeCallback) {
                         recurrence_days: recurrenceDaysVal
                     }]);
                     if (error) throw error;
+                    const { error: rpcError } = await supabase.rpc('increment_tasks_created', {
+                         p_user_id: userId
+                    });
+                    if (rpcError) {
+                        console.error("Erreur lors de l'incrémentation de total_tasks_created :", rpcError.message);
+                    }
                 }
 
                 closeModal();
