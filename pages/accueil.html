@@ -78,6 +78,13 @@
                         <button class="add-task-btn"><i class="fa-solid fa-plus"></i> Ajouter</button>
                     </div>
 
+                    <!-- Barre de filtres par catégorie  -->
+                    <div class="category-filter-bar" id="category-filter-bar">
+                        <button type="button" class="filter-chip active" data-filter="all">Toutes</button>
+                        <button type="button" class="filter-chip" data-filter="school">École</button>
+                        <button type="button" class="filter-chip" data-filter="personal">Personnel</button>
+                    </div>
+
                     <!-- Conteneur dynamique des tâches (affiche les tâches ou le message par défaut s'il n'y en a pas) -->
                     <div class="tasks-list" id="tasks-container">
                         <!-- Injection dynamique JS -->

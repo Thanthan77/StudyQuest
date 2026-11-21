@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // On mémorise l'onglet actif globalement ici
         let currentActiveTab = 'today';
+        let currentCategoryFilter = 'all'; // Valeur par défaut du filtre de catégorie
 
         const reloadCurrentTab = (forcedTab = null) => {
             if (forcedTab) {
@@ -25,8 +26,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentActiveTab === 'overdue' && text.includes("en retard")) btn.classList.add('active');
             });
 
-            loadAccueilData(currentActiveTab);
+            loadAccueilData(currentActiveTab,currentCategoryFilter);
         };
+
+
+        // Gestion des boutons de filtre : Toutes | École | Personnel
+        const filterBtns = document.querySelectorAll('.category-filter-bar .filter-chip');
+
+        const resetCategoryFilter = () => {
+            currentCategoryFilter = 'all';
+            filterBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === 'all');
+            });
+        };
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const selectedFilter = btn.dataset.filter || 'all';
+                if (selectedFilter === currentCategoryFilter) return;
+
+                currentCategoryFilter = selectedFilter;
+                filterBtns.forEach(b => b.classList.toggle('active', b === btn));
+
+                reloadCurrentTab();
+            });
+        });
 
         reloadCurrentTab('today');
         initTasksModule(reloadCurrentTab); 
@@ -35,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tabBtns.forEach((btn, index) => {
             if (btn.classList.contains('add-task-btn')) return;
             btn.addEventListener('click', () => {
+                resetCategoryFilter();
                 tabBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 

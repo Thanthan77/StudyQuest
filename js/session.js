@@ -2,7 +2,7 @@ import { supabase } from './supabaseClient.js';
 import { getTodayDate, isGoalReachedToday,checkAndResetRecurringTasks } from './utils.js';
 import { checkAndIncrementStreak } from './app.js';
 
-export async function loadAccueilData(currentTab = 'today') {
+export async function loadAccueilData(currentTab = 'today', categoryFilter = 'all') {
     const storedUser = localStorage.getItem('studyquest_user');
     if (!storedUser) {
         window.location.href = '../index.html';
@@ -169,15 +169,27 @@ export async function loadAccueilData(currentTab = 'today') {
         }
 
         let { data: tasks } = tasksRes;
+        tasks = tasks || [];
+        if (categoryFilter === 'school') {
+            tasks = tasks.filter(task => task.category === 'school');
+        } else if (categoryFilter === 'personal') {
+            tasks = tasks.filter(task => task.category !== 'school');
+        }
         const tasksContainer = document.getElementById('tasks-container');
 
         if (tasksContainer) {
             if (!tasks || tasks.length === 0) {
                 let emptyMessage = "Vous n'avez pas de tâches aujourd'hui";
-                if (currentTab === 'overdue') emptyMessage = "Aucune tâche en retard 🎉";
+                if (currentTab === 'overdue') emptyMessage = "Aucune tâche en retard ";
                 if (currentTab === 'upcoming') emptyMessage = "Aucune tâche à venir";
                 if (currentTab === 'flexible') emptyMessage = "Aucune tâche flexible";
                 if (currentTab === 'completed') emptyMessage = "Aucune tâche complétée pour l'instant";
+
+                if (categoryFilter === 'school') {
+                    emptyMessage += " dans la catégorie École";
+                } else if (categoryFilter === 'personal') {
+                    emptyMessage += " dans la catégorie Personnel";
+                }
 
                 tasksContainer.innerHTML = `<div class="empty-state-tasks">${emptyMessage}</div>`;
             } else {
