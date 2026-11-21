@@ -5,10 +5,9 @@ import { startMidnightCountdown } from './countdown.js';
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('username-display')) {
         startMidnightCountdown();
-        
-        // On mémorise l'onglet actif globalement ici
+
         let currentActiveTab = 'today';
-        let currentCategoryFilter = 'all'; // Valeur par défaut du filtre de catégorie
+        let currentCategoryFilter = 'all';
 
         const reloadCurrentTab = (forcedTab = null) => {
             if (forcedTab) {
@@ -26,34 +25,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentActiveTab === 'overdue' && text.includes("en retard")) btn.classList.add('active');
             });
 
-            loadAccueilData(currentActiveTab,currentCategoryFilter);
+            loadAccueilData(currentActiveTab, currentCategoryFilter);
         };
-
-
-        // Gestion des boutons de filtre : Toutes | École | Personnel
-        const filterBtns = document.querySelectorAll('.category-filter-bar .filter-chip');
 
         const resetCategoryFilter = () => {
             currentCategoryFilter = 'all';
-            filterBtns.forEach(btn => {
+            const chips = document.querySelectorAll('.category-filter-bar .filter-chip');
+            chips.forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.filter === 'all');
             });
         };
 
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const selectedFilter = btn.dataset.filter || 'all';
-                if (selectedFilter === currentCategoryFilter) return;
+        // Délégation d'événement pour supporter les catégories générées dynamiquement
+        const filterBar = document.getElementById('category-filter-bar') || document.querySelector('.category-filter-bar');
+        if (filterBar) {
+            filterBar.addEventListener('click', (e) => {
+                const chip = e.target.closest('.filter-chip');
+                if (!chip) return;
+
+                const selectedFilter = chip.dataset.filter || 'all';
+                if (selectedFilter.toLowerCase() === currentCategoryFilter.toLowerCase()) return;
 
                 currentCategoryFilter = selectedFilter;
-                filterBtns.forEach(b => b.classList.toggle('active', b === btn));
+
+                filterBar.querySelectorAll('.filter-chip').forEach(b => {
+                    b.classList.toggle('active', b === chip);
+                });
 
                 reloadCurrentTab();
             });
-        });
+        }
 
         reloadCurrentTab('today');
-        initTasksModule(reloadCurrentTab); 
+        initTasksModule(reloadCurrentTab);
 
         const tabBtns = document.querySelectorAll('.tasks-tabs .tab-btn');
         tabBtns.forEach((btn, index) => {
@@ -62,9 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetCategoryFilter();
                 tabBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                
+
                 if (index === 0) reloadCurrentTab('today');
-                 else if (index === 1) reloadCurrentTab('overdue');
+                else if (index === 1) reloadCurrentTab('overdue');
                 else if (index === 2) reloadCurrentTab('upcoming');
                 else if (index === 3) reloadCurrentTab('flexible');
                 else if (index === 4) reloadCurrentTab('completed');

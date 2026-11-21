@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyQuest - Statistiques</title>
+    <link rel="stylesheet" href="../css/general.css">
+    <link rel="stylesheet" href="../css/components/statistiques.css">
+    <!-- FontAwesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="app-body">
+
+    <!-- Barre latérale (Sidebar) -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-logo">StudyQuest</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="accueil.html" class="nav-item"><i class="fa-solid fa-house"></i> Accueil</a>
+            <a href="groups.html" class="nav-item"><i class="fa-solid fa-user-group"></i> Mes groupes</a>
+            <a href="statistiques.html" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Statistiques</a>
+        </nav>
+        <div class="sidebar-footer">
+            <button id="logout-btn" class="logout-btn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="main-content">
+
+        <!-- En-tête -->
+        <header class="stats-header">
+            <h1 class="page-title">Statistiques</h1>
+            <p class="registration-sub" id="registration-date-text">Depuis ton inscription, le <span id="member-since-date">--</span></p>
+        </header>
+
+        <!-- Grille principale 2x2 -->
+        <div class="stats-bento-grid">
+
+            <!-- Vue d'ensemble -->
+            <section class="stat-card overview-card">
+                <div class="card-top">
+                    <h2>Vue d'ensemble</h2>
+                    <i class="fa-regular fa-square-check card-header-icon"></i>
+                </div>
+
+                <div class="overview-hero">
+                    <span class="overview-percent" id="completion-rate-display">0%</span>
+                    <div class="overview-meta">
+                        <span class="overview-subtitle">de réussite</span>
+                        <span class="overview-fraction" id="completion-fraction-display">0 tâche sur 0</span>
+                    </div>
+                </div>
+
+                <!-- Barre segmentée (Complétées / Manquées / En cours) -->
+                <div class="segmented-bar" aria-hidden="true">
+                    <div class="seg-fill seg-completed" id="bar-completed" style="width: 0%;"></div>
+                    <div class="seg-fill seg-overdue" id="bar-overdue" style="width: 0%;"></div>
+                    <div class="seg-fill seg-pending" id="bar-pending" style="width: 0%;"></div>
+                </div>
+
+                <div class="mini-metrics-grid four-cols">
+                    <div class="mini-metric-box">
+                        <span class="mini-value" id="stat-total-created">0</span>
+                        <span class="mini-label"><span class="dot dot-purple"></span> Créées</span>
+                    </div>
+                    <div class="mini-metric-box">
+                        <span class="mini-value" id="stat-total-completed">0</span>
+                        <span class="mini-label"><span class="dot dot-green"></span> Complétées</span>
+                    </div>
+                    <div class="mini-metric-box">
+                        <span class="mini-value" id="stat-total-overdue">0</span>
+                        <span class="mini-label"><span class="dot dot-pink"></span> Manquées</span>
+                    </div>
+                    <div class="mini-metric-box">
+                        <span class="mini-value" id="stat-total-active">0</span>
+                        <span class="mini-label"><span class="dot dot-gray"></span> En cours</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Séries & gels -->
+            <section class="stat-card streaks-card">
+                <div class="card-top">
+                    <h2>Séries &amp; gels</h2>
+                    <i class="fa-solid fa-fire card-header-icon"></i>
+                </div>
+
+                <div class="streak-hero">
+                    <div class="flame-box">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <div class="streak-hero-text">
+                        <span class="streak-big-number" id="current-streak-big">0</span>
+                        <span class="streak-hero-sub">jours de série actuelle</span>
+                    </div>
+                </div>
+
+                <div class="record-progress-block">
+                    <div class="record-progress-header">
+                        <span>Vers ton record</span>
+                        <strong id="record-progress-label">0 / 0 jours</strong>
+                    </div>
+                    <div class="linear-track">
+                        <div class="linear-fill indigo-fill" id="record-progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div class="streak-subcards-grid">
+                    <div class="mini-metric-box streak-subcard">
+                        <div class="subcard-title"><i class="fa-solid fa-trophy"></i> Record absolu</div>
+                        <div class="subcard-main" id="best-streak-value">0 jours</div>
+                        <div class="subcard-note" id="best-streak-date">Aucun record encore</div>
+                    </div>
+
+                    <div class="mini-metric-box streak-subcard">
+                        <div class="subcard-title"><i class="fa-regular fa-snowflake"></i> Gels de réserve</div>
+                        <div class="subcard-main" id="freezes-reserve-value">0 / 2</div>
+                        <div class="subcard-note freezes-used-row">
+                            <span id="freeze-flakes-icons">
+                                <i class="fa-regular fa-snowflake"></i>
+                                <i class="fa-regular fa-snowflake"></i>
+                            </span>
+                            <span><strong id="freezes-used-count">0</strong> utilisés</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Répartition catégories  -->
+            <section class="stat-card category-card">
+                <div class="card-top">
+                    <h2>Répartition par catégories</h2>
+                    <span class="total-pill" id="category-total-badge">0 tâche</span>
+                </div>
+                <div id="category-breakdown-list" class="category-breakdown-list">
+                    <!-- Généré dynamiquement par statistiques.js -->
+                </div>
+                
+            </section>
+
+            <!--  Badges -->
+            <section class="stat-card badges-card">
+                <div class="card-top">
+                    <h2>Badges</h2>
+                    <span class="total-pill" id="badges-progress-badge">0 / 10</span>
+                </div>
+
+                <div class="badges-grid" id="badges-container">
+                    <!-- Injection dynamique JS des badges depuis Supabase -->
+                    <div class="badge-tile unlocked">
+                        <div class="badge-icon-box gold"><i class="fa-regular fa-calendar-check"></i></div>
+                        <div class="badge-title">Première semaine</div>
+                        <div class="badge-status unlocked-text">Débloqué</div>
+                    </div>
+
+                    <div class="badge-tile unlocked">
+                        <div class="badge-icon-box indigo"><i class="fa-solid fa-check"></i></div>
+                        <div class="badge-title">50 tâches</div>
+                        <div class="badge-status unlocked-text">Débloqué</div>
+                    </div>
+
+                    <div class="badge-tile locked">
+                        <div class="badge-icon-box locked-box"><i class="fa-regular fa-snowflake"></i></div>
+                        <div class="badge-title">Maître du gel</div>
+                        <div class="badge-status" id="badge-freeze-label">0 / 5 gels utilisés</div>
+                        <div class="badge-mini-bar"><div style="width: 0%;"></div></div>
+                    </div>
+
+                    <div class="badge-tile locked">
+                        <div class="badge-icon-box locked-box"><i class="fa-solid fa-lock"></i></div>
+                        <div class="badge-title">Série de 30</div>
+                        <div class="badge-status" id="badge-streak30-label">0 / 30 jours</div>
+                        <div class="badge-mini-bar"><div style="width: 0%;"></div></div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Module JS d'authentification et de gestion de session -->
+    <script type="module" src="../js/auth.js"></script>
+    <!-- Module JS de la page statistiques -->
+    <script type="module" src="../js/stats.js"></script>
+</body>
+</html>

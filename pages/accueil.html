@@ -140,21 +140,20 @@
     </main>
 
      <!-- Modal d'ajout de tâche -->
-<div id="task-modal" class="modal-overlay" >
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Nouvelle tâche</h2>
-            <button id="close-modal-btn" class="close-btn"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        
-        <form id="add-task-form">
-            <div class="form-group">
-                <label>Que veux-tu faire ?</label>
-                <input type="text" id="task-title-input" placeholder="Ex. : Relire le cours d'anglais" required autocomplete="off">
+<div id="task-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nouvelle tâche</h2>
+                <button id="close-modal-btn" class="close-btn"><i class="fa-solid fa-xmark"></i></button>
             </div>
+            
+            <form id="add-task-form">
+                <div class="form-group">
+                    <label>Intitulé de la tâche</label>
+                    <input type="text" id="task-title-input" placeholder="Ex. : Relire le cours d'anglais" required autocomplete="off">
+                </div>
 
-            <div class="form-row">
-                <div class="form-group half">
+                <div class="form-group">
                     <label>Quand</label>
                     <div class="toggle-options">
                         <button type="button" class="toggle-btn active" data-when="specific">
@@ -163,61 +162,65 @@
                         <button type="button" class="toggle-btn" data-when="flexible">
                             <i class="fa-solid fa-layer-group"></i> Quand je veux
                         </button>
+                        <button type="button" class="toggle-btn" data-when="recurring">
+                            <i class="fa-solid fa-rotate"></i> Récurrente
+                        </button>
                     </div>
                 </div>
 
-                <div class="form-group half" id="date-container">
+                <div class="form-group" id="date-container">
                     <label>Date</label>
                     <div class="input-with-icon">
                         <input type="date" id="task-date-input">
                     </div>
                 </div>
-            </div>
 
-            <div class="form-group" id="recurrence-container" style="display: none;">
-                <label>Fréquence de récurrence</label>
-                <div class="toggle-options">
-                    <button type="button" class="rec-btn active" data-rec="daily">Tous les jours</button>
-                    <button type="button" class="rec-btn" data-rec="weekly">Jours précis de la semaine</button>
-                </div>
+                <div class="form-group" id="recurrence-container" style="display: none;">
+                    <label>Fréquence de récurrence</label>
+                    <div class="toggle-options">
+                        <button type="button" class="rec-btn active" data-rec="daily">Tous les jours</button>
+                        <button type="button" class="rec-btn" data-rec="weekly">Certains jours</button>
+                    </div>
 
-                <!-- Sélection des jours de la semaine (caché par défaut si "Tous les jours" est actif) -->
-                <div id="weekly-days-container" style="display: none; margin-top: 12px;">
-                    <label style="font-size: 0.85rem; margin-bottom: 6px; display: block; color: var(--text-muted);">Sélectionne les jours :</label>
-                    <div class="days-selector" style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        <label class="day-chip"><input type="checkbox" name="rec-day" value="1"> L</label>
-                        <label class="day-chip"><input type="checkbox" name="rec-day" value="2"> M</label>
-                        <label class="day-chip"><input type="checkbox" name="rec-day" value="3"> M</label>
-                        <label class="day-chip"><input type="checkbox" name="rec-day" value="4"> J</label>
-                        <label class="day-chip"><input type="checkbox" name="rec-day" value="5"> V</label>
-                        <label class="day-chip"><input type="checkbox" name="rec-day" value="6"> S</label>
-                        <label class="day-chip"><input type="checkbox" name="rec-day" value="0"> D</label>
+                    <!-- Sélection des jours de la semaine (caché par défaut si "Tous les jours" est actif) -->
+                    <div id="weekly-days-container" style="display: none; margin-top: 12px;">
+                        <label style="font-size: 0.85rem; margin-bottom: 6px; display: block; color: var(--text-muted);">Sélectionne les jours :</label>
+                        <div class="days-selector" style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <label class="day-chip"><input type="checkbox" name="rec-day" value="1"> L</label>
+                            <label class="day-chip"><input type="checkbox" name="rec-day" value="2"> M</label>
+                            <label class="day-chip"><input type="checkbox" name="rec-day" value="3"> M</label>
+                            <label class="day-chip"><input type="checkbox" name="rec-day" value="4"> J</label>
+                            <label class="day-chip"><input type="checkbox" name="rec-day" value="5"> V</label>
+                            <label class="day-chip"><input type="checkbox" name="rec-day" value="6"> S</label>
+                            <label class="day-chip"><input type="checkbox" name="rec-day" value="0"> D</label>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>Catégorie</label>
-                <div class="category-options">
-                    <button type="button" class="category-btn active" data-category="school">
-                        <i class="fa-solid fa-book"></i> École
-                    </button>
-                    <button type="button" class="category-btn" data-category="perso">
-                        <i class="fa-solid fa-user"></i> Personnel
-                    </button>
-                    <button type="button" class="toggle-btn" data-when="recurring">
-                        <i class="fa-solid fa-rotate"></i> Récurrente
-                    </button>
+                <div class="form-group">
+                    <label for="task-category-select">Catégorie</label>
+                    <select id="task-category-select" class="category-select"></select>
+                    <div id="categories-tags-list" class="categories-tags-list"></div>
+                    <div class="new-category-row" style="display: flex; gap: 8px; margin-top: 10px;">
+                        <input
+                            type="text"
+                            id="new-category-input"
+                            placeholder="Nouvelle catégorie (ex. : Sport, SAP...)"
+                            autocomplete="off"
+                        >
+                        <button type="button" id="add-category-btn" class="btn-secondary">
+                            <i class="fa-solid fa-plus"></i> Ajouter
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="modal-actions">
-                <button type="submit" class="btn-primary">Ajouter la tâche</button>
-                <button type="button" id="cancel-modal-btn" class="btn-secondary">Annuler</button>
-            </div>
-        </form>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Ajouter la tâche</button>
+                    <button type="button" id="cancel-modal-btn" class="btn-secondary">Annuler</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
     <!-- Module JS d'authentification et de gestion de session -->
     <script type="module" src="../js/auth.js"></script>

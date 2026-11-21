@@ -110,3 +110,13 @@ export function formatRecurrenceBadge(task) {
     }
     return '';
 }
+
+export function getActiveUserId() {
+    const stored = localStorage.getItem('studyquest_user');
+    if (!stored) return null;
+    try {
+        return JSON.parse(stored).id || null;
+    } catch {
+        return null;
+    }
+}
