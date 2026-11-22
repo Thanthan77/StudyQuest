@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyQuest - Mes groupes</title>
+    <!-- Lien vers les fichiers CSS -->
+    <link rel="stylesheet" href="../css/general.css">
+    <link rel="stylesheet" href="../css/components/groups.css">
+    <!-- FontAwesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="app-body">
+
+    <!-- Barre latérale (Sidebar) -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <span class="sidebar-logo">StudyQuest</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="accueil.html" class="nav-item"><i class="fa-solid fa-house"></i> Accueil</a>
+            <a href="groups.html" class="nav-item active"><i class="fa-solid fa-user-group"></i> Mes groupes</a>
+            <a href="statistiques.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Statistiques</a>
+        </nav>
+        <div class="sidebar-footer">
+            <button id="logout-btn" class="logout-btn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Contenu principal -->
+    <main class="main-content">
+
+        <!-- En-tête -->
+        <header class="dashboard-header">
+            <h1 class="welcome-title">Mes groupes</h1>
+            <div class="header-actions">
+                <button type="button" id="open-create-group-btn" class="btn-secondary">
+                    <i class="fa-solid fa-plus"></i> Créer un groupe
+                </button>
+                <button type="button" id="open-join-group-btn" class="add-task-btn">
+                    <i class="fa-solid fa-plus"></i> Rejoindre un groupe
+                </button>
+            </div>
+        </header>
+
+        <!-- Onglets dynamiques des groupes de l'utilisateur -->
+        <div class="group-tabs-bar" id="groups-tabs-container" role="tablist">
+            <!-- Injection dynamique JS -->
+        </div>
+
+        <!-- Carte détaillée du groupe actif -->
+        <section class="group-detail-card" id="group-detail-card">
+            <div class="group-detail-header">
+                <h2 id="active-group-name">Chargement...</h2>
+                <span class="group-members-count" id="active-group-members-count">0 / 10 membres</span>
+            </div>
+
+            <!-- Classement des membres du groupe -->
+            <div class="group-members-list" id="group-members-container">
+                <!-- Injection dynamique JS -->
+            </div>
+
+            <!-- Bloc code d'invitation -->
+            <div class="invite-code-bar">
+                <div class="invite-code-info">
+                    <span class="invite-code-label">Code d'invitation</span>
+                    <strong class="invite-code-value" id="active-invite-code">------</strong>
+                </div>
+                <button type="button" id="copy-invite-code-btn" class="copy-code-btn">Copier</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal : Rejoindre un groupe -->
+    <div id="join-group-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Rejoindre un groupe</h2>
+                <button type="button" id="close-join-modal-btn" class="close-btn">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="join-group-form">
+                <div class="form-group">
+                    <label for="invite-code-input">Code d'invitation</label>
+                    <input
+                        type="text"
+                        id="invite-code-input"
+                        placeholder="Ex. : QX7-M2K"
+                        maxlength="20"
+                        required
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Rejoindre</button>
+                    <button type="button" id="cancel-join-modal-btn" class="btn-secondary">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal : Créer un groupe -->
+    <div id="create-group-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Créer un groupe</h2>
+                <button type="button" id="close-create-modal-btn" class="close-btn">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="create-group-form">
+                <div class="form-group">
+                    <label for="group-name-input">Nom du groupe</label>
+                    <input
+                        type="text"
+                        id="group-name-input"
+                        placeholder="Ex. : Les Révisionnistes"
+                        maxlength="60"
+                        required
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Créer le groupe</button>
+                    <button type="button" id="cancel-create-modal-btn" class="btn-secondary">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Module JS d'authentification et de gestion de session -->
+    <script type="module" src="../js/auth.js"></script>
+    <!-- Module JS de la page groupes -->
+    <script type="module" src="../js/groups.js"></script>
+</body>
+</html>

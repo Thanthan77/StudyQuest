@@ -1,0 +1,309 @@
+/* Conteneur principal aligné sur la sidebar fixe de general.css */
+.main-content {
+    margin-left: 240px;
+    flex-grow: 1;
+    padding: 36px 40px;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* En-tête de la page */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.welcome-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.header-actions .btn-secondary {
+    padding: 9px 14px;
+    font-size: 0.88rem;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-task-btn {
+    background-color: #6366f1;
+    color: #ffffff;
+    border: 1px solid #6366f1;
+    padding: 9px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.add-task-btn:hover {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+}
+
+/* Onglets des groupes */
+.group-tabs-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.group-tab-btn {
+    background-color: #18181b;
+    border: 1px solid #27272a;
+    color: #d4d4d8;
+    padding: 9px 14px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.group-tab-btn:hover {
+    border-color: #6366f1;
+    color: #ffffff;
+}
+
+.group-tab-btn.active {
+    background-color: #6366f1;
+    border-color: #6366f1;
+    color: #ffffff;
+}
+
+.group-tab-rank {
+    background-color: rgba(255, 255, 255, 0.14);
+    color: #e4e4e7;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 6px;
+}
+
+.group-tab-btn.active .group-tab-rank {
+    background-color: rgba(0, 0, 0, 0.25);
+    color: #ffffff;
+}
+
+/* Carte principale du groupe sélectionné */
+.group-detail-card {
+    background-color: #18181b;
+    border: 1px solid #27272a;
+    padding: 22px 24px;
+    max-width: 960px;
+}
+
+.group-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.group-detail-header h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.group-members-count {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+/* Classement des membres */
+.group-members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.member-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 10px 14px;
+    background-color: #141417;
+    border: 1px solid #242429;
+}
+
+.member-row.is-current-user {
+    background-color: rgba(99, 102, 241, 0.18);
+    border-color: rgba(99, 102, 241, 0.45);
+}
+
+.member-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.rank-badge {
+    min-width: 34px;
+    padding: 4px 6px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    background-color: #202026;
+    color: #a1a1aa;
+}
+
+.rank-badge.rank-1 {
+    background-color: rgba(245, 158, 11, 0.16);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.member-avatar {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #ffffff;
+    background-color: #6366f1;
+    flex-shrink: 0;
+}
+
+.member-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.member-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.member-tasks {
+    font-size: 0.78rem;
+    color: #9ca3af;
+}
+
+.member-streak {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #f4f4f5;
+    flex-shrink: 0;
+}
+
+.member-streak i {
+    color: #f59e0b;
+}
+
+/* Barre code d'invitation */
+.invite-code-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    background-color: #141417;
+    border: 1px solid #26262c;
+}
+
+.invite-code-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.invite-code-label {
+    font-size: 0.78rem;
+    color: #9ca3af;
+}
+
+.invite-code-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #a5b4fc;
+}
+
+.copy-code-btn {
+    background-color: #202026;
+    border: 1px solid #6366f1;
+    color: #e0e7ff;
+    padding: 8px 16px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.copy-code-btn:hover {
+    background-color: #6366f1;
+    color: #ffffff;
+}
+
+.empty-groups-state {
+    text-align: center;
+    padding: 28px 16px;
+    color: #9ca3af;
+    font-size: 0.92rem;
+}
+
+/* Permet l'ouverture propre avec modal.classList.add("is-open") */
+.modal-overlay.is-open {
+    display: flex !important;
+}
+
+/* Responsive */
+@media (min-width: 769px) {
+    .main-content {
+        width: calc(100% - 240px);
+    }
+}
+
+@media (max-width: 820px) {
+    .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #2d2d34;
+    }
+
+    body.app-body {
+        flex-direction: column;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+    }
+}
