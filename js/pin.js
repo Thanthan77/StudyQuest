@@ -26,6 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Gérer la touche Retour en arrière (Backspace) pour reculer
         input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const form = input.closest('form');
+                if (form) form.requestSubmit();
+                    return;
+            }
+            
             if (e.key === 'Backspace') {
                 if (input.value === '' && index > 0) {
                     // Si la case est déjà vide, on recule et on efface la précédente
