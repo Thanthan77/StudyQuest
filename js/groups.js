@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient.js";
+import { computeRankedMembers } from "./groupRanking.js";
 
 const MAX_GROUP_MEMBERS = 10;
 
@@ -24,23 +25,26 @@ document.addEventListener("DOMContentLoaded", () => {
   initModalsAndActions();
 });
 
-async function resolveCurrentUser() {
+function resolveCurrentUser() {
   const storedUser = localStorage.getItem("studyquest_user");
-  if (storedUser) {
-    try {
-      const parsed = JSON.parse(storedUser);
-      if (parsed?.id) return parsed;
-    } catch {
-      // Ignore le JSON invalide et vérifie la session Supabase
-    }
-  }
+  if (!storedUser) return null;
 
-  const { data } = await supabase.auth.getSession();
-  return data?.session?.user || null;
+  try {
+    const parsed = JSON.parse(storedUser);
+    return parsed?.id ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function getRequestedGroupIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const rawId = params.get("group");
+  return rawId ? String(rawId) : null;
 }
 
 async function initGroupsPage() {
-  const user = await resolveCurrentUser();
+  const user = resolveCurrentUser();
   if (!user?.id) {
     window.location.href = "../index.html";
     return;
@@ -48,21 +52,6 @@ async function initGroupsPage() {
 
   currentUser = user;
   await loadUserGroups();
-}
-
-function getProfileDisplayName(profile, fallbackUserId) {
-  const candidate =
-    profile?.username ||
-    profile?.full_name ||
-    profile?.name ||
-    "";
-  const trimmed = String(candidate).trim();
-  if (trimmed) return trimmed;
-  return `Membre ${String(fallbackUserId || "").slice(0, 5)}`;
-}
-
-function formatRank(index) {
-  return index === 0 ? "1er" : `${index + 1}e`;
 }
 
 function getMemberAvatarColor(seed = "") {
@@ -108,22 +97,26 @@ async function loadUserGroups() {
 
     const groupIds = groupsList.map((g) => g.id);
 
+    // Sélection explicite sans la colonne "pin"
     const { data: allMembers, error: membersError } = await supabase
       .from("group_members")
-      .select("group_id, user_id, role, profiles(*)")
+      .select(
+        "group_id, user_id, role, profiles(id, username, total_completed_tasks, current_streak)",
+      )
       .in("group_id", groupIds);
 
     if (membersError) throw membersError;
 
     userGroups = groupsList.map((group) => {
-      const members = (allMembers || [])
+      const rawMembers = (allMembers || [])
         .filter((m) => m.group_id === group.id)
         .map((m) => {
           const profile = m.profiles || {};
-          const displayName = getProfileDisplayName(profile, m.user_id);
+          const displayName =
+            String(profile.username || "").trim() ||
+            `Membre ${String(m.user_id).slice(0, 5)}`;
           const completedTasks =
-            Number(profile.completed_tasks ?? profile.total_tasks_completed ?? 0) ||
-            0;
+            Number(profile.total_completed_tasks ?? 0) || 0;
           const streak = Number(profile.current_streak ?? 0) || 0;
 
           return {
@@ -135,22 +128,26 @@ async function loadUserGroups() {
             streak,
             isCurrentUser: m.user_id === currentUser.id,
           };
-        })
-        .sort(
-          (a, b) =>
-            b.completedTasks - a.completedTasks || b.streak - a.streak,
-        );
+        });
 
-      const currentUserIndex = members.findIndex((m) => m.isCurrentUser);
+      const rankedMembers = computeRankedMembers(rawMembers);
+      const currentUserMember = rankedMembers.find((m) => m.isCurrentUser);
 
       return {
         ...group,
-        members,
-        userRankLabel: currentUserIndex >= 0 ? formatRank(currentUserIndex) : "-",
+        members: rankedMembers,
+        userRankLabel: currentUserMember ? currentUserMember.rankLabel : "-",
       };
     });
 
-    if (!activeGroupId || !userGroups.some((g) => g.id === activeGroupId)) {
+    const requestedGroupId = getRequestedGroupIdFromUrl();
+    const matchedRequestedGroup = requestedGroupId
+      ? userGroups.find((g) => String(g.id) === requestedGroupId)
+      : null;
+
+    if (matchedRequestedGroup) {
+      activeGroupId = matchedRequestedGroup.id;
+    } else if (!activeGroupId || !userGroups.some((g) => g.id === activeGroupId)) {
       activeGroupId = userGroups[0].id;
     }
 
@@ -198,6 +195,13 @@ function renderTabs() {
   });
 }
 
+function getRankBadgeClass(rankIndex) {
+  if (rankIndex === 0) return "rank-1";
+  if (rankIndex === 1) return "rank-2";
+  if (rankIndex === 2) return "rank-3";
+  return "";
+}
+
 function renderActiveGroup() {
   const group = userGroups.find((g) => g.id === activeGroupId);
   if (!group) {
@@ -221,8 +225,8 @@ function renderActiveGroup() {
   }
 
   membersContainer.innerHTML = group.members
-    .map((member, index) => {
-      const rankClass = index === 0 ? "rank-1" : "";
+    .map((member) => {
+      const rankClass = getRankBadgeClass(member.rankIndex);
       const currentClass = member.isCurrentUser ? "is-current-user" : "";
       const labelName = member.isCurrentUser
         ? `${member.name} (toi)`
@@ -233,7 +237,7 @@ function renderActiveGroup() {
       return `
         <div class="member-row ${currentClass}">
           <div class="member-left">
-            <span class="rank-badge ${rankClass}">${formatRank(index)}</span>
+            <span class="rank-badge ${rankClass}">${member.rankLabel}</span>
             <span class="member-avatar" style="background-color: ${avatarBg};">${member.initial}</span>
             <div class="member-info">
               <span class="member-name">${labelName}</span>
@@ -446,9 +450,8 @@ function initModalsAndActions() {
       }
     });
 
-  document.getElementById("logout-btn")?.addEventListener("click", async () => {
+  document.getElementById("logout-btn")?.addEventListener("click", () => {
     localStorage.removeItem("studyquest_user");
-    await supabase.auth.signOut();
     window.location.href = "../index.html";
   });
 }

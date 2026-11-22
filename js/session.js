@@ -1,8 +1,10 @@
 import { supabase } from './supabaseClient.js';
 import { getTodayDate, isGoalReachedToday, checkAndResetRecurringTasks } from './utils.js';
 import { checkAndIncrementStreak } from './app.js';
+import { computeRankedMembers } from './groupRanking.js';
 
 const DEFAULT_CATEGORIES = ['École', 'Personnel'];
+const MAX_GROUP_MEMBERS = 10;
 
 const CATEGORY_PALETTE = [
     '#6366f1',
@@ -79,6 +81,207 @@ function renderCategoryFilterChips(customCategories, activeFilter, tasks = []) {
     ].join('');
 }
 
+function openJoinGroupModal() {
+    const modal = document.getElementById('join-group-modal');
+    if (!modal) return;
+    modal.classList.add('is-open');
+    modal.style.display = 'flex';
+    const input = document.getElementById('invite-code-input');
+    setTimeout(() => input?.focus(), 20);
+}
+
+function closeJoinGroupModal() {
+    const modal = document.getElementById('join-group-modal');
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.style.display = 'none';
+    document.getElementById('join-group-form')?.reset();
+}
+
+function bindJoinGroupModal(userId) {
+    const joinBtn = document.querySelector('.join-group-btn');
+    if (joinBtn && !joinBtn.dataset.bound) {
+        joinBtn.dataset.bound = 'true';
+        joinBtn.addEventListener('click', openJoinGroupModal);
+    }
+
+    const modal = document.getElementById('join-group-modal');
+    if (modal && !modal.dataset.bound) {
+        modal.dataset.bound = 'true';
+
+        document
+            .getElementById('close-join-modal-btn')
+            ?.addEventListener('click', closeJoinGroupModal);
+
+        document
+            .getElementById('cancel-join-modal-btn')
+            ?.addEventListener('click', closeJoinGroupModal);
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeJoinGroupModal();
+            }
+        });
+
+        document
+            .getElementById('join-group-form')
+            ?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const input = document.getElementById('invite-code-input');
+                const code = input?.value.trim().toUpperCase();
+                if (!code || !userId) return;
+
+                try {
+                    const { data: targetGroup, error: findError } = await supabase
+                        .from('groups')
+                        .select('id, name, invite_code')
+                        .eq('invite_code', code)
+                        .single();
+
+                    if (findError || !targetGroup) {
+                        alert("Code d'invitation introuvable.");
+                        return;
+                    }
+
+                    const { count, error: countError } = await supabase
+                        .from('group_members')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('group_id', targetGroup.id);
+
+                    if (countError) throw countError;
+
+                    if ((count ?? 0) >= MAX_GROUP_MEMBERS) {
+                        alert(`Ce groupe a déjà atteint la limite de ${MAX_GROUP_MEMBERS} membres.`);
+                        return;
+                    }
+
+                    const { error: insertError } = await supabase
+                        .from('group_members')
+                        .insert({
+                            group_id: targetGroup.id,
+                            user_id: userId,
+                            role: 'member',
+                        });
+
+                    if (insertError) {
+                        if (insertError.code === '23505') {
+                            alert("Tu fais déjà partie de ce groupe.");
+                        } else {
+                            throw insertError;
+                        }
+                        return;
+                    }
+
+                    closeJoinGroupModal();
+                    await loadHomeGroups(userId);
+                } catch (err) {
+                    console.error("Erreur pour rejoindre le groupe :", err.message || err);
+                    alert("Impossible de rejoindre le groupe.");
+                }
+            });
+    }
+}
+
+async function loadHomeGroups(userId) {
+    bindJoinGroupModal(userId);
+
+    const countBadge = document.getElementById('groups-count-badge');
+    const container = document.getElementById('groups-container');
+    if (!container) return;
+
+    try {
+        const { data: memberships, error: memError } = await supabase
+            .from('group_members')
+            .select('group_id, groups(id, name)')
+            .eq('user_id', userId);
+
+        if (memError) throw memError;
+
+        const groupsList = (memberships || [])
+            .map(row => row.groups)
+            .filter(Boolean);
+
+        if (countBadge) countBadge.textContent = groupsList.length;
+
+        if (groupsList.length === 0) {
+            container.innerHTML = `<div class="empty-groups-msg">Aucun groupe pour l'instant.</div>`;
+            return;
+        }
+
+        const groupIds = groupsList.map(g => g.id);
+
+        const { data: allMembers, error: membersError } = await supabase
+            .from('group_members')
+            .select('group_id, user_id, profiles(id, username, total_completed_tasks, current_streak)')
+            .in('group_id', groupIds);
+
+        if (membersError) throw membersError;
+
+        const cardsData = groupsList.map(group => {
+            const rawMembers = (allMembers || [])
+                .filter(m => m.group_id === group.id)
+                .map(m => {
+                    const profile = m.profiles || {};
+                    const displayName =
+                        String(profile.username || '').trim() ||
+                        `Membre ${String(m.user_id).slice(0, 5)}`;
+
+                    return {
+                        userId: m.user_id,
+                        name: displayName,
+                        completedTasks: Number(profile.total_completed_tasks ?? 0) || 0,
+                        streak: Number(profile.current_streak ?? 0) || 0,
+                        isCurrentUser: m.user_id === userId,
+                    };
+                });
+
+            const ranked = computeRankedMembers(rawMembers);
+            const currentMember = ranked.find(m => m.isCurrentUser);
+            const memberCount = rawMembers.length;
+            const isFull = memberCount >= MAX_GROUP_MEMBERS;
+
+            return {
+                id: group.id,
+                name: group.name,
+                rankIndex: currentMember ? currentMember.rankIndex : 99,
+                rankLabel: currentMember ? currentMember.rankLabel : '-',
+                memberCount,
+                isFull,
+            };
+        });
+
+        container.innerHTML = cardsData
+            .map(grp => {
+                const rankClass = grp.rankIndex === 0 ? 'rank-1' : '';
+                const countText = grp.isFull
+                    ? `${grp.memberCount} / ${MAX_GROUP_MEMBERS} membres, complet`
+                    : `${grp.memberCount} / ${MAX_GROUP_MEMBERS} membres`;
+
+                return `
+                    <div class="group-item" data-group-id="${grp.id}">
+                        <span class="group-rank-badge ${rankClass}">${grp.rankLabel}</span>
+                        <div class="group-info">
+                            <strong>${grp.name}</strong>
+                            <small>${countText}</small>
+                        </div>
+                        <i class="fa-solid fa-chevron-right group-arrow"></i>
+                    </div>
+                `;
+            })
+            .join('');
+
+        container.querySelectorAll('.group-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const groupId = item.dataset.groupId;
+                window.location.href = `groups.html?group=${encodeURIComponent(groupId)}`;
+            });
+        });
+    } catch (err) {
+        console.error("Erreur chargement groupes accueil :", err.message || err);
+        container.innerHTML = `<div class="empty-groups-msg">Impossible de charger tes groupes.</div>`;
+    }
+}
+
 export async function loadAccueilData(currentTab = 'today', categoryFilter = 'all') {
     const storedUser = localStorage.getItem('studyquest_user');
     if (!storedUser) {
@@ -117,6 +320,8 @@ export async function loadAccueilData(currentTab = 'today', categoryFilter = 'al
             supabase.from('tasks').select('*').eq('user_id', localUser.id).eq('task_type', 'recurring').eq('status', 'pending'),
             fetchTasksForTab(localUser.id, currentTab, today, todayDayOfWeek)
         ]);
+
+        await loadHomeGroups(localUser.id);
 
         let profile = profileRes.data;
         let allCompletedTasks = allCompletedTasksRes.data;
@@ -312,7 +517,6 @@ export async function loadAccueilData(currentTab = 'today', categoryFilter = 'al
     }
 }
 
-// Fonction utilitaire pour la requête dynamique de l'onglet
 async function fetchTasksForTab(userId, currentTab, today, todayDayOfWeek) {
     let query = supabase.from('tasks').select('*').eq('user_id', userId);
 

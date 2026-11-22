@@ -222,6 +222,38 @@
         </div>
     </div>
 
+    <!-- Modal Rejoindre un groupe -->
+    <div id="join-group-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Rejoindre un groupe</h2>
+                <button type="button" id="close-join-modal-btn" class="close-btn" aria-label="Fermer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="join-group-form">
+                <div class="form-group">
+                    <label for="invite-code-input">Code d'invitation</label>
+                    <input
+                        type="text"
+                        id="invite-code-input"
+                        placeholder="Ex. : QX7-M2K"
+                        maxlength="7"
+                        required
+                        autocomplete="off"
+                        style="text-transform: uppercase; letter-spacing: 0.14em;"
+                    >
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Rejoindre</button>
+                    <button type="button" id="cancel-join-modal-btn" class="btn-secondary">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Module JS d'authentification et de gestion de session -->
     <script type="module" src="../js/auth.js"></script>
     <!-- Module JS de la page d'accueil -->

@@ -322,7 +322,14 @@
     border: 1px solid #2d2d34; 
     padding: 12px; 
     margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
 }
+.group-item:hover {
+    border-color: #6366f1;
+    background: #17171c;
+}
+
 .group-info { 
     flex-grow: 1; 
 }
@@ -347,6 +354,125 @@
 }
 .join-group-btn:hover { 
     background: rgba(99, 102, 241, 0.05); 
+}
+
+.group-item:last-child {
+    margin-bottom: 0;
+}
+
+.group-rank-badge {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #222229;
+    border: 1px solid #32323c;
+    color: #e4e4e7;
+    font-size: 0.78rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.group-rank-badge.rank-1 {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #78350f;
+}
+
+.group-arrow {
+    color: #71717a;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.empty-groups-msg {
+    color: #9ca3af;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 14px 8px;
+}
+
+/* Modale Rejoindre un groupe (si pas déjà présente sur la page) */
+.sq-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    padding: 16px;
+}
+
+.sq-modal-backdrop.is-open {
+    display: flex;
+}
+
+.sq-modal-box {
+    width: 100%;
+    max-width: 380px;
+    background: #18181b;
+    border: 1px solid #2d2d34;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sq-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sq-modal-header h4 {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.sq-modal-close {
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.sq-modal-input {
+    width: 100%;
+    background: #121214;
+    border: 1px solid #2d2d34;
+    color: #ffffff;
+    padding: 10px 12px;
+    font-size: 0.92rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    box-sizing: border-box;
+}
+
+.sq-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.sq-btn-cancel {
+    background: transparent;
+    border: 1px solid #2d2d34;
+    color: #d4d4d8;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+.sq-btn-submit {
+    background: #6366f1;
+    border: 1px solid #6366f1;
+    color: #ffffff;
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 .streak-icon { 

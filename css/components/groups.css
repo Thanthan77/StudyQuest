@@ -2,7 +2,7 @@
 .main-content {
     margin-left: 240px;
     flex-grow: 1;
-    padding: 36px 40px;
+    padding: 36px 44px;
     min-height: 100vh;
     box-sizing: border-box;
 }
@@ -18,12 +18,13 @@
 }
 
 .welcome-title {
-    font-size: 1.85rem;
+    font-size: 1.9rem;
     font-weight: 800;
     color: #ffffff;
     letter-spacing: -0.02em;
 }
 
+/* Boutons d'action conservés tels quels */
 .header-actions {
     display: flex;
     align-items: center;
@@ -71,13 +72,13 @@
     background-color: #18181b;
     border: 1px solid #27272a;
     color: #d4d4d8;
-    padding: 9px 14px;
-    font-size: 0.88rem;
+    padding: 10px 16px;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
@@ -93,24 +94,27 @@
 }
 
 .group-tab-rank {
-    background-color: rgba(255, 255, 255, 0.14);
-    color: #e4e4e7;
+    background-color: #202026;
+    border: 1px solid #2e2e36;
+    color: #a1a1aa;
     font-size: 0.72rem;
     font-weight: 700;
-    padding: 2px 6px;
+    padding: 2px 7px;
 }
 
 .group-tab-btn.active .group-tab-rank {
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: transparent;
     color: #ffffff;
 }
 
-/* Carte principale du groupe sélectionné */
+/* Carte principale pleine largeur comme sur la maquette */
 .group-detail-card {
     background-color: #18181b;
     border: 1px solid #27272a;
-    padding: 22px 24px;
-    max-width: 960px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .group-detail-header {
@@ -118,27 +122,30 @@
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    margin-bottom: 16px;
+    padding: 22px 24px 14px 24px;
 }
 
 .group-detail-header h2 {
-    font-size: 1.2rem;
-    font-weight: 700;
+    font-size: 1.25rem;
+    font-weight: 800;
     color: #ffffff;
+    letter-spacing: -0.01em;
 }
 
 .group-members-count {
     font-size: 0.85rem;
     color: #9ca3af;
     font-weight: 500;
+    font-variant-numeric: tabular-nums;
 }
 
-/* Classement des membres */
+/* Liste du classement */
 .group-members-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 18px;
+    padding: 0 24px;
+    max-height: 365px;
+    overflow-y: auto;
 }
 
 .member-row {
@@ -146,47 +153,71 @@
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    padding: 10px 14px;
-    background-color: #141417;
-    border: 1px solid #242429;
+    padding: 12px 14px;
+    background-color: transparent;
+    border-bottom: 1px solid #242429;
+}
+
+.member-row:last-child {
+    border-bottom: none;
 }
 
 .member-row.is-current-user {
-    background-color: rgba(99, 102, 241, 0.18);
-    border-color: rgba(99, 102, 241, 0.45);
+    background-color: rgba(99, 102, 241, 0.22);
+    border-bottom-color: rgba(99, 102, 241, 0.35);
 }
 
 .member-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     min-width: 0;
 }
 
+/* Badges de classement 1er, 2e, 3e, 4e+ */
 .rank-badge {
-    min-width: 34px;
-    padding: 4px 6px;
-    text-align: center;
+    width: 38px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-size: 0.78rem;
-    font-weight: 700;
+    font-weight: 800;
     background-color: #202026;
+    border: 1px solid #32323b;
     color: #a1a1aa;
+    flex-shrink: 0;
 }
 
 .rank-badge.rank-1 {
-    background-color: rgba(245, 158, 11, 0.16);
-    color: #fbbf24;
-    border: 1px solid rgba(245, 158, 11, 0.35);
+    background-color: #fbbf24;
+    border-color: #f59e0b;
+    color: #451a03;
+    box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.25);
+}
+
+.rank-badge.rank-2 {
+    background-color: #cbd5e1;
+    border-color: #94a3b8;
+    color: #0f172a;
+    box-shadow: 0 0 0 1px rgba(203, 213, 225, 0.2);
+}
+
+.rank-badge.rank-3 {
+    background-color: #c2410c;
+    border-color: #fb923c;
+    color: #fff7ed;
+    box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.25);
 }
 
 .member-avatar {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     color: #ffffff;
     background-color: #6366f1;
     flex-shrink: 0;
@@ -200,7 +231,7 @@
 }
 
 .member-name {
-    font-size: 0.92rem;
+    font-size: 0.94rem;
     font-weight: 700;
     color: #ffffff;
 }
@@ -214,7 +245,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.92rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: #f4f4f5;
     flex-shrink: 0;
@@ -224,21 +255,21 @@
     color: #f59e0b;
 }
 
-/* Barre code d'invitation */
+/* Pied de carte : Code d'invitation */
 .invite-code-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
-    padding: 14px 16px;
-    background-color: #141417;
-    border: 1px solid #26262c;
+    padding: 16px 24px;
+    background-color: #161619;
+    border-top: 1px solid #27272a;
 }
 
 .invite-code-info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
 }
 
 .invite-code-label {
@@ -247,18 +278,18 @@
 }
 
 .invite-code-value {
-    font-size: 0.95rem;
+    font-size: 0.98rem;
     font-weight: 700;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     color: #a5b4fc;
 }
 
 .copy-code-btn {
-    background-color: #202026;
+    background-color: #1c1c21;
     border: 1px solid #6366f1;
-    color: #e0e7ff;
-    padding: 8px 16px;
-    font-size: 0.84rem;
+    color: #c7d2fe;
+    padding: 9px 18px;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease;
@@ -271,12 +302,12 @@
 
 .empty-groups-state {
     text-align: center;
-    padding: 28px 16px;
+    padding: 32px 16px;
     color: #9ca3af;
     font-size: 0.92rem;
 }
 
-/* Permet l'ouverture propre avec modal.classList.add("is-open") */
+/* Affichage des modales */
 .modal-overlay.is-open {
     display: flex !important;
 }
