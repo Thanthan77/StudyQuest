@@ -1,6 +1,15 @@
 import { supabase } from "./supabaseClient.js";
 import { getTodayDate, checkAndResetRecurringTasks } from "./utils.js";
 
+const CATEGORY_PALETTE = [
+  "#6366f1",
+  "#34d399",
+  "#fbbf24",
+  "#7dd3fc",
+  "#f472b6",
+  "#c084fc",
+];
+
 document.addEventListener("DOMContentLoaded", () => {
   loadStatistiquesData();
   initBadgesModalEvents();
@@ -232,6 +241,15 @@ function renderCategoryBreakdown(tasks, customCategories, maxVisible = 6) {
     orderedCategories.push("École", "Personnel");
   }
 
+  // Couleur fixe associée à chaque catégorie selon son ordre
+  const colorMap = new Map();
+  orderedCategories.forEach((label, idx) => {
+    colorMap.set(
+      label.toLowerCase(),
+      CATEGORY_PALETTE[idx % CATEGORY_PALETTE.length],
+    );
+  });
+
   // Comptage des tâches par catégorie
   const countsMap = new Map(
     orderedCategories.map((c) => [c.toLowerCase(), 0]),
@@ -247,7 +265,8 @@ function renderCategoryBreakdown(tasks, customCategories, maxVisible = 6) {
       const count = countsMap.get(label.toLowerCase()) || 0;
       const pct =
         totalCategorized > 0 ? Math.round((count / totalCategorized) * 100) : 0;
-      return { label, count, pct };
+      const color = colorMap.get(label.toLowerCase()) || CATEGORY_PALETTE[0];
+      return { label, count, pct, color };
     })
     .sort((a, b) => b.count - a.count)
     .slice(0, maxVisible);
@@ -260,22 +279,20 @@ function renderCategoryBreakdown(tasks, customCategories, maxVisible = 6) {
     return;
   }
 
-  const palette = ["#6366f1", "#34d399", "#fbbf24", "#7dd3fc", "#f472b6", "#c084fc"];
   breakdownContainer.innerHTML = breakdown
-    .map((item, index) => {
-      const color = palette[index % palette.length];
-      return `
+    .map(
+      (item) => `
         <div class="category-stat-row">
           <div class="category-stat-header">
             <span class="category-stat-name">${item.label}</span>
             <span class="category-stat-meta">${item.count} ${item.count > 1 ? "tâches" : "tâche"} (${item.pct}%)</span>
           </div>
           <div class="category-stat-bar-track">
-            <div class="category-stat-bar-fill" style="width: ${item.pct}%; background-color: ${color};"></div>
+            <div class="category-stat-bar-fill" style="width: ${item.pct}%; background-color: ${item.color};"></div>
           </div>
         </div>
-      `;
-    })
+      `,
+    )
     .join("");
 }
 
@@ -320,21 +337,62 @@ function selectTopFourBadges(catalogBadges, unlockedIds) {
   return [...unlocked, ...locked].slice(0, 4);
 }
 
-function renderBadgeTile(badge, isUnlocked) {
+function getBadgeProgressText(badge, stats = {}) {
+  const target = Number(badge.target_value) || 1;
+  const totalCompleted = Number(stats.totalCompleted) || 0;
+  const freezesUsed = Number(stats.freezesUsed) || 0;
+  const bestStreak = Math.max(
+    Number(stats.currentStreak) || 0,
+    Number(stats.bestStreak) || 0,
+  );
+  const groupsCount = Number(stats.groupsCount) || 0;
+
+  switch (badge.category) {
+    case "tasks": {
+      const current = Math.min(totalCompleted, target);
+      const unit = target > 1 ? "tâches complétées" : "tâche complétée";
+      return `${current} / ${target} ${unit}`;
+    }
+    case "gel": {
+      const current = Math.min(freezesUsed, target);
+      const unit = target > 1 ? "gels utilisés" : "gel utilisé";
+      return `${current} / ${target} ${unit}`;
+    }
+    case "streak": {
+      const current = Math.min(bestStreak, target);
+      const unit = target > 1 ? "jours" : "jour";
+      return `${current} / ${target} ${unit}`;
+    }
+    case "group": {
+      const current = Math.min(groupsCount, target);
+      const unit = target > 1 ? "groupes" : "groupe";
+      return `${current} / ${target} ${unit}`;
+    }
+    default:
+      return badge.requirement_label || "Verrouillé";
+  }
+}
+
+function renderBadgeTile(badge, isUnlocked, stats = {}, showProgress = false) {
   const title = badge.name || badge.title || "Badge";
   const description = badge.description || "";
   const iconClass = isUnlocked ? "fa-solid fa-award" : "fa-solid fa-lock";
   const iconBoxClass = isUnlocked ? "gold" : "locked-box";
+  const statusText = isUnlocked
+    ? "Débloqué"
+    : showProgress
+      ? getBadgeProgressText(badge, stats)
+      : badge.requirement_label || "Verrouillé";
 
   return `
-        <div class="badge-tile ${isUnlocked ? "unlocked" : "locked"}" title="${badge.description || title}">
-        ${description ? `<div class="badge-desc">${description}</div>` : ""}
+        <div class="badge-tile ${isUnlocked ? "unlocked" : "locked"}" title="${description || title}">
             <div class="badge-icon-box ${iconBoxClass}">
                 <i class="${iconClass}"></i>
             </div>
             <div class="badge-title">${title}</div>
+            ${description ? `<div class="badge-desc">${description}</div>` : ""}
             <div class="badge-status ${isUnlocked ? "unlocked-text" : ""}">
-                ${isUnlocked ? "Débloqué" : badge.requirement_label || "Verrouillé"}
+                ${statusText}
             </div>
         </div>
     `;
@@ -373,14 +431,14 @@ async function evaluateAndRenderBadges({
     const visibleBadges = selectTopFourBadges(catalogBadges, unlockedIds);
     if (container) {
       container.innerHTML = visibleBadges
-        .map((badge) => renderBadgeTile(badge, unlockedIds.has(badge.id)))
+        .map((badge) => renderBadgeTile(badge, unlockedIds.has(badge.id), stats, false))
         .join("");
     }
 
-    // Remplit aussi la liste du popup si tu ouvres la vue complète des badges
+    // Remplit aussi la liste du popup avec la progression des badges non débloqués
     if (allBadgesList) {
       allBadgesList.innerHTML = catalogBadges
-        .map((badge) => renderBadgeTile(badge, unlockedIds.has(badge.id)))
+        .map((badge) => renderBadgeTile(badge, unlockedIds.has(badge.id), stats, true))
         .join("");
     }
   } else {

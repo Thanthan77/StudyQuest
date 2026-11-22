@@ -153,36 +153,30 @@
 
                 <div class="badges-grid" id="badges-container">
                     <!-- Injection dynamique JS des badges depuis Supabase -->
-                    <div class="badge-tile unlocked">
-                        <div class="badge-icon-box gold"><i class="fa-regular fa-calendar-check"></i></div>
-                        <div class="badge-title">Première semaine</div>
-                        <div class="badge-status unlocked-text">Débloqué</div>
-                    </div>
-
-                    <div class="badge-tile unlocked">
-                        <div class="badge-icon-box indigo"><i class="fa-solid fa-check"></i></div>
-                        <div class="badge-title">50 tâches</div>
-                        <div class="badge-status unlocked-text">Débloqué</div>
-                    </div>
-
-                    <div class="badge-tile locked">
-                        <div class="badge-icon-box locked-box"><i class="fa-regular fa-snowflake"></i></div>
-                        <div class="badge-title">Maître du gel</div>
-                        <div class="badge-status" id="badge-freeze-label">0 / 5 gels utilisés</div>
-                        <div class="badge-mini-bar"><div style="width: 0%;"></div></div>
-                    </div>
-
-                    <div class="badge-tile locked">
-                        <div class="badge-icon-box locked-box"><i class="fa-solid fa-lock"></i></div>
-                        <div class="badge-title">Série de 30</div>
-                        <div class="badge-status" id="badge-streak30-label">0 / 30 jours</div>
-                        <div class="badge-mini-bar"><div style="width: 0%;"></div></div>
-                    </div>
+                
                 </div>
+                <button type="button" class="btn-secondary" id="open-all-badges-btn" class="btn-view-all-badges">
+                        Voir tous les badges
+                    </button>
             </section>
 
         </div>
     </main>
+
+    <!-- Pop-up : Tous les badges -->
+    <div id="all-badges-modal" class="badges-modal-overlay" style="display: none;">
+        <div class="badges-modal-content">
+            <div class="badges-modal-header">
+                <h3>Tous les badges</h3>
+                <button type="button" id="close-all-badges-btn" class="badges-modal-close" aria-label="Fermer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="all-badges-modal-list" class="all-badges-grid">
+                <!-- Généré dynamiquement par stats.js -->
+            </div>
+        </div>
+    </div>
 
     <!-- Module JS d'authentification et de gestion de session -->
     <script type="module" src="../js/auth.js"></script>
