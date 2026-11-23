@@ -86,7 +86,7 @@ StudyQuest/
 └── pages/
     ├── accueil.html
     └── groups.html
-```[cite: 4]
+```
 
 ---
 
