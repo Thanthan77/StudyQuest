@@ -90,9 +90,10 @@ StudyQuest/
 
 ---
 
-## Liens importants
+##  Liens importants
 
-| Type | Lien |
-|---|---|
-| **Site déployé** | `https://thanthan77.github.io/StudyQuest/` |
-| **Repository GitHub** | `https://github.com/Thanthan77/StudyQuest` |
+| Type               | Lien                                                                 |
+|--------------------|----------------------------------------------------------------------|
+| **Site déployé**   | [https://thanthan77.github.io/StudyQuest/](https://thanthan77.github.io/StudyQuest/)           |
+| **Repository GitHub** | [https://github.com/Thanthan77/StudyQuest](https://github.com/Thanthan77/StudyQuest) |
+
