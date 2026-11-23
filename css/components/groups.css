@@ -312,6 +312,99 @@
     display: flex !important;
 }
 
+.group-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-leave-group,
+.btn-delete-group {
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #2d2d34;
+    background: #18181b;
+    color: #e4e4e7;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-leave-group:hover {
+    border-color: #f59e0b;
+    color: #fbbf24;
+}
+
+.btn-delete-group {
+    border-color: rgba(239, 68, 68, 0.45);
+    color: #f87171;
+}
+
+.btn-delete-group:hover {
+    background: rgba(239, 68, 68, 0.14);
+    border-color: #ef4444;
+    color: #fca5a5;
+}
+
+.group-detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.group-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.group-title-block h2 {
+    margin: 0;
+}
+
+.group-members-count {
+    font-size: 0.85rem;
+    color: #9ca3af;
+}
+
+.group-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.group-tabs-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.swap-groups-btn {
+    background: #18181b;
+    border: 1px solid #2d2d34;
+    color: #d4d4d8;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.swap-groups-btn:hover {
+    border-color: #6366f1;
+    color: #ffffff;
+    background: #1f1f26;
+}
+
 /* Responsive */
 @media (min-width: 769px) {
     .main-content {

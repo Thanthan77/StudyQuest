@@ -81,6 +81,10 @@ async function loadUserGroups() {
 
     if (memError) throw memError;
 
+    const roleByGroupId = new Map(
+      (memberships || []).map((row) => [row.group_id, row.role]),
+    );
+
     const groupsList = (memberships || [])
       .map((row) => row.groups)
       .filter(Boolean);
@@ -135,6 +139,7 @@ async function loadUserGroups() {
 
       return {
         ...group,
+        currentUserRole: roleByGroupId.get(group.id) || "member",
         members: rankedMembers,
         userRankLabel: currentUserMember ? currentUserMember.rankLabel : "-",
       };
@@ -156,6 +161,27 @@ async function loadUserGroups() {
   } catch (err) {
     console.error("Erreur lors du chargement des groupes :", err.message || err);
     renderEmptyState("Impossible de charger tes groupes pour le moment.");
+  }
+}
+
+function updateGroupActionButtons(group) {
+  const leaveBtn = document.getElementById("leave-group-btn");
+  const deleteBtn = document.getElementById("delete-group-btn");
+
+  if (!group) {
+    if (leaveBtn) leaveBtn.style.display = "none";
+    if (deleteBtn) deleteBtn.style.display = "none";
+    return;
+  }
+
+  const isAdmin =
+    group.currentUserRole === "admin" || group.created_by === currentUser?.id;
+
+  if (leaveBtn) {
+    leaveBtn.style.display = isAdmin ? "none" : "inline-flex";
+  }
+  if (deleteBtn) {
+    deleteBtn.style.display = isAdmin ? "inline-flex" : "none";
   }
 }
 
@@ -215,6 +241,7 @@ function renderActiveGroup() {
     `${group.members.length} / ${MAX_GROUP_MEMBERS} membres`,
   );
   setText("active-invite-code", group.invite_code);
+  updateGroupActionButtons(group);
 
   const membersContainer = document.getElementById("group-members-container");
   if (!membersContainer) return;
@@ -258,6 +285,7 @@ function renderEmptyState(message) {
   setText("active-group-name", "Mes groupes");
   setText("active-group-members-count", `0 / ${MAX_GROUP_MEMBERS} membres`);
   setText("active-invite-code", "------");
+  updateGroupActionButtons(null);
 
   const membersContainer = document.getElementById("group-members-container");
   if (membersContainer) {
@@ -361,6 +389,76 @@ async function handleJoinGroup(e) {
   }
 }
 
+async function handleLeaveGroup() {
+  const group = userGroups.find((g) => g.id === activeGroupId);
+  if (!group || !currentUser?.id) return;
+
+  const isAdmin =
+    group.currentUserRole === "admin" || group.created_by === currentUser.id;
+  if (isAdmin) {
+    alert("En tant qu'administrateur, tu peux supprimer le groupe.");
+    return;
+  }
+
+  const ok = confirm(`Veux-tu vraiment quitter le groupe "${group.name}" ?`);
+  if (!ok) return;
+
+  try {
+    const { error } = await supabase
+      .from("group_members")
+      .delete()
+      .eq("group_id", group.id)
+      .eq("user_id", currentUser.id);
+
+    if (error) throw error;
+
+    activeGroupId = null;
+    await loadUserGroups();
+  } catch (err) {
+    console.error("Erreur en quittant le groupe :", err.message || err);
+    alert("Impossible de quitter le groupe.");
+  }
+}
+
+async function handleDeleteGroup() {
+  const group = userGroups.find((g) => g.id === activeGroupId);
+  if (!group || !currentUser?.id) return;
+
+  const isAdmin =
+    group.currentUserRole === "admin" || group.created_by === currentUser.id;
+  if (!isAdmin) {
+    alert("Seul l'administrateur peut supprimer ce groupe.");
+    return;
+  }
+
+  const ok = confirm(
+    `Supprimer définitivement le groupe "${group.name}" ? Cette action est irréversible.`,
+  );
+  if (!ok) return;
+
+  try {
+    const { error: membersDelError } = await supabase
+      .from("group_members")
+      .delete()
+      .eq("group_id", group.id);
+
+    if (membersDelError) throw membersDelError;
+
+    const { error: groupDelError } = await supabase
+      .from("groups")
+      .delete()
+      .eq("id", group.id);
+
+    if (groupDelError) throw groupDelError;
+
+    activeGroupId = null;
+    await loadUserGroups();
+  } catch (err) {
+    console.error("Erreur lors de la suppression du groupe :", err.message || err);
+    alert("Impossible de supprimer le groupe.");
+  }
+}
+
 function openModal(modalId, focusInputId) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
@@ -428,6 +526,14 @@ function initModalsAndActions() {
   document
     .getElementById("create-group-form")
     ?.addEventListener("submit", handleCreateGroup);
+
+  document
+    .getElementById("leave-group-btn")
+    ?.addEventListener("click", handleLeaveGroup);
+
+  document
+    .getElementById("delete-group-btn")
+    ?.addEventListener("click", handleDeleteGroup);
 
   document
     .getElementById("copy-invite-code-btn")

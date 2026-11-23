@@ -47,16 +47,39 @@
             </div>
         </header>
 
-        <!-- Onglets dynamiques des groupes de l'utilisateur -->
-        <div class="group-tabs-bar" id="groups-tabs-container" role="tablist">
-            <!-- Injection dynamique JS -->
+        
+        <div class="group-tabs-wrapper">
+            <!-- Onglets dynamiques des groupes de l'utilisateur -->
+            <div class="group-tabs-bar" id="groups-tabs-container" role="tablist">
+                <!-- Injection dynamique JS -->
+            </div>
+            <button
+            type="button"
+            id="swap-groups-order-btn"
+            class="swap-groups-btn"
+            title="Échanger l'ordre des groupes"
+            style="display: none;"
+            >
+            <i class="fa-solid fa-left-right"></i> Échanger
+            </button>
         </div>
+    
 
         <!-- Carte détaillée du groupe actif -->
         <section class="group-detail-card" id="group-detail-card">
             <div class="group-detail-header">
-                <h2 id="active-group-name">Chargement...</h2>
-                <span class="group-members-count" id="active-group-members-count">0 / 10 membres</span>
+                <div class="group-title-block">
+                    <h2 id="active-group-name">Chargement...</h2>
+                    <span class="group-members-count" id="active-group-members-count">0 / 10 membres</span>
+                </div>
+                <div class="group-header-actions" id="group-header-actions">
+                        <button type="button" class="btn-leave-group" id="leave-group-btn" style="display: none;">
+                            <i class="fa-solid fa-right-from-bracket"></i> Quitter
+                        </button>
+                        <button type="button" class="btn-delete-group" id="delete-group-btn" style="display: none;">
+                            <i class="fa-solid fa-trash"></i> Supprimer
+                        </button>
+                    </div>
             </div>
 
             <!-- Classement des membres du groupe -->
