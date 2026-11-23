@@ -5,6 +5,7 @@ import { computeRankedMembers } from './groupRanking.js';
 
 const DEFAULT_CATEGORIES = ['École', 'Personnel'];
 const MAX_GROUP_MEMBERS = 10;
+const MAX_HOME_GROUPS = 4;
 
 const CATEGORY_PALETTE = [
     '#6366f1',
@@ -250,7 +251,9 @@ async function loadHomeGroups(userId) {
             };
         });
 
-        container.innerHTML = cardsData
+        const visibleGroups = cardsData.slice(0, MAX_HOME_GROUPS);
+
+        container.innerHTML = visibleGroups
             .map(grp => {
                 const rankClass = grp.rankIndex === 0 ? 'rank-1' : '';
                 const countText = grp.isFull
