@@ -20,9 +20,9 @@ Le projet inclut :
 
 ### 🔹 Fonctionnalités clés
 
-- **Authentification & Session** : inscription et connexion via des interfaces dédiées avec pseudo unique en minuscules, code PIN à 4 chiffres (`NOT NULL`) et session persistée via `localStorage`.
-- **Tableau de bord Bento-Grid (`accueil.html`)** : interface modulaire en thème sombre aux coins non arrondis intégrant le pseudo, les statistiques de base et un *countdown* horaire (`timer-badge`).
-- **Gestionnaire de tâches** : ajout, modification, suppression et validation des tâches dans la table `tasks`, avec limite de 10 tâches par jour, défilement (*scroll*), redirection vers la section cible à l'ajout et conservation des cases cochées après rafraîchissement.
+- **Authentification & Session** : inscription et connexion via des interfaces dédiées avec pseudo unique en minuscules, code PIN à 4 chiffres et session persistée via `localStorage`.
+- **Tableau de bord Bento-Grid (`accueil.html`)** : interface modulaire en thème sombre aux coins non arrondis intégrant le pseudo, les statistiques de base et un *countdown* horaire .
+- **Gestionnaire de tâches** : ajout, modification, suppression et validation des tâches dans la table `tasks`, avec limite de 10 tâches par jour, défilement, redirection vers la section cible à l'ajout et conservation des cases cochées après rafraîchissement.
 - **Organisation & Catégories** : navigation entre *Aujourd'hui*, *À venir*, *Flexibles* et tâches manquées, filtrage par catégories (*Personnel* et *École*), ajout et suppression de catégories, gestion des tâches récurrentes (tous les jours ou certains jours) et mise à jour du compteur total de tâches créées (`+1` à l'ajout, `-1` à la suppression).
 - **Séries (*Streaks*) & Gels** : calcul des jours consécutifs d'utilisation, protection par gel de série (*streak freeze*), obtention d'un gel tous les 7 jours, notifications visuelles d'obtention ou d'utilisation et compteur de gels utilisés.
 - **Badges & Statistiques** : 10 badges officiels attribués automatiquement, affichage des badges débloqués, vue élargie (au-delà de 4 badges), suivi de progression sur les badges restants, record absolu de *streak*, gels disponibles/utilisés, répartition par catégories et vue d'ensemble (*complétées, créées, manquées, en cours*).
