@@ -5,7 +5,7 @@ import { computeRankedMembers } from './groupRanking.js';
 
 const DEFAULT_CATEGORIES = ['École', 'Personnel'];
 const MAX_GROUP_MEMBERS = 10;
-const MAX_HOME_GROUPS = 4;
+const MAX_HOME_GROUPS = 3;
 
 const CATEGORY_PALETTE = [
     '#6366f1',
